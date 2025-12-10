@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <title>Recruiter Sign-in - Stitch</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&amp;display=swap"
+    rel="stylesheet" />
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "primary": "#46ec13",
+            "background-light": "#f6f8f6",
+            "background-dark": "#142210",
+          },
+          fontFamily: {
+            "display": ["Manrope", "sans-serif"]
+          },
+          borderRadius: { "DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px" },
+        },
+      },
+    }
+  </script>
+</head>
+
+<body
+  class="font-display bg-background-light dark:bg-background-dark flex items-center justify-center min-h-screen p-4">
+
+  <div class="w-full max-w-md bg-[#152211] rounded-2xl p-8 border border-[#2c4823] shadow-xl">
+    <div class="flex justify-center mb-6">
+      <div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-12"
+        style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuB6G5I5DigGispgUCJilH8SKOigJF9F4GwPxhdFnT4iVIq20ilMld6tKTCAMQ7moLT1dFiYBzFp9SC9x98H2srPIIAsKIPN8EWCJRcWCiRLPKO_hQBcx9HlT-3ngrvegSkW8LBDuerCHYCS4sDjg6yHNIE5eWJehBqEXLKfuzhJkVMlwfgf-dwqypT5LP1r50U9o43ShJAdo4IIn49t_ltQ95589W1cYQFslwtTdHanPPjGsVWAzF-zun5IUI0MRg3b4Tj3iwxONsZC");'>
+      </div>
+    </div>
+
+    <h1 class="text-white text-2xl font-bold text-center mb-8">Recruiter sign-in</h1>
+
+    <form action="/pages/recruiter-dashboard.html/code.html" class="flex flex-col gap-4">
+      <div>
+        <label for="email" class="block text-[#9fc992] text-sm font-medium mb-2">Email address</label>
+        <input type="email" id="email" name="email"
+          class="w-full bg-[#2c4823]/30 border border-[#2c4823] rounded-lg px-4 py-3 text-white placeholder-[#9fc992]/50 focus:ring-primary focus:border-primary"
+          placeholder="name@company.com" required>
+      </div>
+
+      <div>
+        <label for="password" class="block text-[#9fc992] text-sm font-medium mb-2">Password</label>
+        <input type="password" id="password" name="password"
+          class="w-full bg-[#2c4823]/30 border border-[#2c4823] rounded-lg px-4 py-3 text-white placeholder-[#9fc992]/50 focus:ring-primary focus:border-primary"
+          placeholder="••••••••" required>
+      </div>
+
+      <button type="submit"
+        class="w-full bg-primary hover:bg-primary/90 text-[#142210] font-bold py-3 px-4 rounded-full transition-colors mt-2">
+        Log in as recruiter
+      </button>
+    </form>
+
+    <div class="mt-6 text-center">
+      <a href="/pages/manager-login.html/code.html" class="text-[#9fc992] hover:text-white text-sm transition-colors">
+        Are you a hiring manager? Log in here
+      </a>
+    </div>
+  </div>
+
+</body>
+
+</html>

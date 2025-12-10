@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Stitch - Interview Templates</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#46ec13",
+                        "background-light": "#f6f8f6",
+                        "background-dark": "#142210",
+                    },
+                    fontFamily: {
+                        "display": ["Manrope", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "1rem",
+                        "lg": "2rem",
+                        "xl": "3rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings:
+                'FILL' 1,
+                'wght' 400,
+                'GRAD' 0,
+                'opsz' 24
+        }
+    </style>
+</head>
+<body class="font-display bg-background-light dark:bg-background-dark">
+<div class="relative flex h-auto min-h-screen w-full flex-col">
+<div class="flex h-full min-h-screen">
+<!-- SideNavBar -->
+<nav class="flex w-64 flex-col justify-between border-r border-gray-200/10 bg-[#152211] p-4 font-display">
+<div class="flex flex-col gap-4">
+<div class="flex items-center gap-4 p-2 text-white">
+<div class="size-6 text-primary">
+<svg fill="none" viewbox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+<path clip-rule="evenodd" d="M24 4H6V17.3333V30.6667H24V44H42V30.6667V17.3333H24V4Z" fill="currentColor" fill-rule="evenodd"></path>
+</svg>
+</div>
+<h2 class="text-white text-xl font-bold leading-tight">Stitch</h2>
+</div>
+<div class="flex flex-col gap-2">
+<a class="flex items-center gap-3 rounded-full px-3 py-2 text-white bg-[#2c4823]" href="#">
+<span class="material-symbols-outlined text-xl">dashboard</span>
+<p class="text-sm font-medium leading-normal">Dashboard</p>
+</a>
+<a class="flex items-center gap-3 rounded-full px-3 py-2 text-white hover:bg-white/5" href="#">
+<span class="material-symbols-outlined text-xl font-light">description</span>
+<p class="text-sm font-medium leading-normal">Templates</p>
+</a>
+<a class="flex items-center gap-3 rounded-full px-3 py-2 text-white hover:bg-white/5" href="#">
+<span class="material-symbols-outlined text-xl font-light">calendar_today</span>
+<p class="text-sm font-medium leading-normal">Interviews</p>
+</a>
+<a class="flex items-center gap-3 rounded-full px-3 py-2 text-white hover:bg-white/5" href="#">
+<span class="material-symbols-outlined text-xl font-light">group</span>
+<p class="text-sm font-medium leading-normal">Candidates</p>
+</a>
+</div>
+</div>
+<div class="flex flex-col gap-4">
+<button class="flex h-10 min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-full bg-primary px-4 text-sm font-bold leading-normal tracking-[0.015em] text-[#152211]">
+<span class="truncate">New Template</span>
+</button>
+<div class="flex flex-col gap-1">
+<a class="flex items-center gap-3 rounded-full px-3 py-2 text-white hover:bg-white/5" href="#">
+<span class="material-symbols-outlined text-xl font-light">settings</span>
+<p class="text-sm font-medium leading-normal">Settings</p>
+</a>
+<a class="flex items-center gap-3 rounded-full px-3 py-2 text-white hover:bg-white/5" href="#">
+<span class="material-symbols-outlined text-xl font-light">help</span>
+<p class="text-sm font-medium leading-normal">Help</p>
+</a>
+</div>
+<div class="flex items-center gap-3 border-t border-gray-200/10 pt-4">
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10" data-alt="Profile picture of a professional woman" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCW_JZE_149isbYccGaqf5Crp7okk1C8xearQSarnHmqaA4NCba8YeYtxg7OJjzlRh0UeXgIooEP1jkoiUpTRJwJnDFPo_dGe50M5AKFEKH_XK8kG9FpFJGYLEu_9In00h2C8f1npBw8HvtOmW_f1KL8TYmNI4wduf3DTF67GZSdXNYewieO9lDWaR97N0DMao7aMbx1IoUDjTMJSu9loiHnQh9EqDo3u27tsDi5OMh9wT5aCCSx_LojS7FdnMpRJWlMnngJGmu8PKv");'></div>
+<div class="flex flex-col">
+<h1 class="text-white text-sm font-medium leading-normal">Sarah Chen</h1>
+<p class="text-[#9fc992] text-xs font-normal leading-normal">Recruiter</p>
+</div>
+</div>
+</div>
+</nav>
+<!-- Main Content -->
+<main class="flex-1 overflow-y-auto">
+<div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+<!-- PageHeading -->
+<div class="flex flex-wrap items-center justify-between gap-4">
+<div class="flex flex-col gap-1">
+<p class="text-white text-3xl font-bold leading-tight tracking-tight">Interview Templates</p>
+<p class="text-[#9fc992] text-base font-normal leading-normal">Create and manage reusable interview schedules.</p>
+</div>
+</div>
+<!-- Table -->
+<div class="mt-8 flow-root">
+<div class="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
+<div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
+<div class="overflow-hidden rounded-xl border border-[#3f6732] bg-[#152211]">
+<table class="min-w-full divide-y divide-[#3f6732]">
+<thead class="bg-[#1f3319]">
+<tr>
+<th class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-white sm:pl-6" scope="col">Template Name</th>
+<th class="px-3 py-3.5 text-left text-sm font-semibold text-white" scope="col">Duration</th>
+<th class="px-3 py-3.5 text-left text-sm font-semibold text-white" scope="col">Hiring Managers</th>
+<th class="px-3 py-3.5 text-left text-sm font-semibold text-white" scope="col">Last Modified</th>
+<th class="relative py-3.5 pl-3 pr-4 sm:pr-6" scope="col">
+<span class="sr-only">Edit</span>
+</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-[#3f6732] bg-[#152211]">
+<tr>
+<td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-white sm:pl-6">Technical Screen</td>
+<td class="whitespace-nowrap px-3 py-4 text-sm text-[#9fc992]">60 min</td>
+<td class="whitespace-nowrap px-3 py-4 text-sm text-[#9fc992]">
+<div class="flex -space-x-2 overflow-hidden">
+<div class="inline-block size-8 rounded-full ring-2 ring-[#152211] bg-cover" data-alt="Portrait of a smiling man" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBKZrYhaOy8ZgqU8Gw3Upztp4zah8pjCFqBVJnE9aMzbRYvs8G2VvuU6FKpRWvpOtupWFaDHHFtJcFeZW6N-PSRolDajohbKedwTqPrPi5a1RazSNI1TCLYDtHDHzuB94FvSlPR-3Jq2Mo2adK_9Qpv5QrEEkwyS4bjdrrfyrsewBCev06U-4WWPBF1-AsKhkOyUmOBP5LnpADRw2Hg9jN3YL2b-S0BMR7A5lYoJs2JPUkBZ2R3bLTzyCWbjSKUQYPUv5X4IMvCauIn")'></div>
+<div class="inline-block size-8 rounded-full ring-2 ring-[#152211] bg-cover" data-alt="Portrait of a woman in glasses" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAF42GU-sMCCS5O3ZxMWMg7p5f4tdVzw7NWnHNIcHe6s4jBLrzJek82iCLX9XxNyV4W3iWNxLGOr2rCOwbdxbGQex8q1CYQUmSJt9jjWk6Q_JpbLZh6GfDf0OzVo4jgvgriLntDdemN0NqaPrfmXado6DGg02SwVzG7r2x8W8ax4Zn8wyXWj2h8PWYtK_fKrANFzAbTJUlB60G1UHiUHtabJI4isCulMJ9oxVT-Zbp66h4v7K3VOsNbTWnFJp0CXf13Hc5-T10Rrez3")'></div>
+</div>
+</td>
+<td class="whitespace-nowrap px-3 py-4 text-sm text-[#9fc992]">July 15, 2024</td>
+<td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
+<a class="text-primary hover:text-primary/80" href="#">Edit</a>
+</td>
+</tr>
+<tr>
+<td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-white sm:pl-6">Behavioral Interview</td>
+<td class="whitespace-nowrap px-3 py-4 text-sm text-[#9fc992]">45 min</td>
+<td class="whitespace-nowrap px-3 py-4 text-sm text-[#9fc992]">
+<div class="flex -space-x-2 overflow-hidden">
+<div class="inline-block size-8 rounded-full ring-2 ring-[#152211] bg-cover" data-alt="Portrait of a woman with curly hair" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuA4TGkCS9KeWv_WAVx40CKiGh9eyGhCsLhInxaYzxS1ZmsTzMhNnLJJh5xKT8JSKpcl4rolEjMbmX-uhFg-h0mSlBq4T2Dan_abWzunWrZFYc8t8ogunBLHTTEBb_qdId2nUE8LNtUI4XFyxL8w0_YPZFKkuEYQ4RQZzjXpLXvsv1eB2DN9I1RWK1VBmMpCGLwm5vTz0mPzw4GIM8wORMAOCdzaxb7IkF91daaXRvtgKGeEl3Yb4WQ8I5FC5k721CXP9TddnJVG2-s5")'></div>
+</div>
+</td>
+<td class="whitespace-nowrap px-3 py-4 text-sm text-[#9fc992]">July 12, 2024</td>
+<td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
+<a class="text-primary hover:text-primary/80" href="#">Edit</a>
+</td>
+</tr>
+<tr>
+<td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-white sm:pl-6">Final Round Panel</td>
+<td class="whitespace-nowrap px-3 py-4 text-sm text-[#9fc992]">90 min</td>
+<td class="whitespace-nowrap px-3 py-4 text-sm text-[#9fc992]">
+<div class="flex -space-x-2 overflow-hidden">
+<div class="inline-block size-8 rounded-full ring-2 ring-[#152211] bg-cover" data-alt="Portrait of a professional man" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAIXdRmoh6PabEHZWEvGpt6D9XboIrdosRXZPAq3-Lf1OCWAOvxYY9KgA8el-d0ZbFZTxwsX6R2Vd7WAtghIKn-enKQUQ_32tXYKTsK-C-le5f7FAgf1xRCL5pJaWFw7TV83-tcapvHPBnCTD_znJIKKGNGV7bCqNZzpwQzofVuilaCi4PEcJ5oWpHvruy_RHg3BPAfJ7BhLHUH1-ur47c1qyu2W5VKlrEfXXaLHat_qPhO96MOxw9X8NUMOv_Y1mca3LpmOxTBYN96")'></div>
+<div class="inline-block size-8 rounded-full ring-2 ring-[#152211] bg-cover" data-alt="Portrait of a woman in a business suit" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAyupCnBAMGE7g_tPPRt-z8yT0PbAJLi5Ns11XMjvew4d3buIGyguz2xWTnJxKnwXF9K9GwJw9CuX1jEdp9dac0eYPAkbDicUKLkgbQnbsiAmAAUV9O292k_kmRPYVHlBopBmZe47-46zfqmVudtr_Foxm-DGiJ7vwiJ0BilQphhEM_qA7Do_gbk3T3BAdMNLP6w8ZO5HHC0tbNQAkhF1WwEYUH9OebqjeglqsOPN0kK9KT8C7Qk7u-spiPp1nZZb_twdTSy5QlgLd2")'></div>
+<div class="inline-block size-8 rounded-full ring-2 ring-[#152211] bg-cover" data-alt="Portrait of a smiling person" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDibk1B0P_7gnXBbe56DvG3SrnfVuamq096rr_F4DJ2f8QLvxe67ZhxFF1zb0xgFkZrT08p9unjBErhu59q0fYTEnRRZoWy252wQE4VgdwKjER5UQfmNj6ARbOPnOkpnr0IBximhQ-Hwo_FLt8XdH9-6LOLuAxqgtbNNjLDmwKRr2ZQxQmy9PcwtvN80-NakUJsfZxeJABeSQ_e_G2iZ3nmPPlVAyRPKKekAmKMKU4bVoOxLYTSd71n7S2eh4o97UIqk_gVoPyngtRw")'></div>
+</div>
+</td>
+<td class="whitespace-nowrap px-3 py-4 text-sm text-[#9fc992]">July 10, 2024</td>
+<td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
+<a class="text-primary hover:text-primary/80" href="#">Edit</a>
+</td>
+</tr>
+<tr>
+<td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-white sm:pl-6">Design Portfolio Review</td>
+<td class="whitespace-nowrap px-3 py-4 text-sm text-[#9fc992]">60 min</td>
+<td class="whitespace-nowrap px-3 py-4 text-sm text-[#9fc992]">
+<div class="flex -space-x-2 overflow-hidden">
+<div class="inline-block size-8 rounded-full ring-2 ring-[#152211] bg-cover" data-alt="Portrait of a smiling woman outdoors" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCBvo2W4V97Qz_z2ZGOR5kGAl_63lLzKVR3cJyX-t2dUherP1WWmCnDOINZkYc76gowOGEC-z5umxmiIrPM0mHmaLQpTkGf_0oyPvi3gsJcxgS_AK7CmuBoyUMEBr1JOrgWOSxVgJPqWO5BK7kZ2gn-410lmqq4tP64zt-DU6p8PHR2Bwld6FjDnCXq4GaucbE1MeRLUaVB0y8cywMG2zcTYNvwciAAEwo3qoDB53dXk2GiAZFOwaP90WsbJSTXHpcO53AXDKG5WVVo")'></div>
+</div>
+</td>
+<td class="whitespace-nowrap px-3 py-4 text-sm text-[#9fc992]">July 9, 2024</td>
+<td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
+<a class="text-primary hover:text-primary/80" href="#">Edit</a>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+</div>
+</body></html>

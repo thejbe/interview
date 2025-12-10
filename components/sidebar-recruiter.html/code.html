@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>components/sidebar-recruiter.html</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary": "#46ec13",
+              "background-light": "#f6f8f6",
+              "background-dark": "#142210",
+            },
+            fontFamily: {
+              "display": ["Manrope"]
+            },
+            borderRadius: {"DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+      .material-symbols-outlined {
+        font-variation-settings: 'FILL' 1;
+      }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display">
+<div class="flex">
+<!-- Sidebar Navigation -->
+<aside class="flex flex-col h-screen w-64 bg-[#142210] p-4 font-display">
+<div class="flex items-center gap-3 p-2 mb-6">
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10" data-alt="Abstract green and black circular logo" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAtk02XUI2TjvCyvZJ55eiIaXagtiaUdmPVL8golyshCvOwCS99zCFsivZkCk1miLFdxIBEDjdqqALhfD7lEytt89hub5hDQ0XOjW3HYsW3KyI6mKR-tyW1VrVBDVeUmOX6a7HJOtyTGmHVfRqQi3lkOgwA612Kx7XV0BSqDr2v0Jar6NpELhRJ_GZywhEDHE822GsWriy4l4vNwCLPbA0uBek_pXak-Z4D1lBUtbO9q_SWEWgtOp7n4BZGzNhgpGFtkB8Tly_E6nt1");'></div>
+<h1 class="text-white text-lg font-bold leading-normal">Stitch</h1>
+</div>
+<div class="flex flex-col gap-4 mb-auto">
+<h2 class="text-gray-400 text-sm font-semibold uppercase px-3">Recruiter</h2>
+<nav class="flex flex-col gap-2">
+<!-- Active Link -->
+<a aria-current="page" class="flex items-center gap-3 px-3 py-2 rounded-full bg-primary nav-link active" href="#">
+<span class="material-symbols-outlined text-background-dark text-2xl">
+                            grid_view
+                        </span>
+<p class="text-background-dark text-sm font-bold leading-normal">Dashboard</p>
+</a>
+<!-- Inactive Links -->
+<a class="flex items-center gap-3 px-3 py-2 rounded-full hover:bg-white/10 transition-colors duration-200 nav-link" href="#">
+<span class="material-symbols-outlined text-white text-2xl font-light">
+                            draft
+                        </span>
+<p class="text-white text-sm font-medium leading-normal">Templates</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-full hover:bg-white/10 transition-colors duration-200 nav-link" href="#">
+<span class="material-symbols-outlined text-white text-2xl font-light">
+                            calendar_add_on
+                        </span>
+<p class="text-white text-sm font-medium leading-normal">Bookings</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-full hover:bg-white/10 transition-colors duration-200 nav-link" href="#">
+<span class="material-symbols-outlined text-white text-2xl font-light">
+                            bar_chart
+                        </span>
+<p class="text-white text-sm font-medium leading-normal">Insights</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-full hover:bg-white/10 transition-colors duration-200 nav-link" href="#">
+<span class="material-symbols-outlined text-white text-2xl font-light">
+                            settings
+                        </span>
+<p class="text-white text-sm font-medium leading-normal">Settings</p>
+</a>
+</nav>
+</div>
+<div class="mt-auto">
+<div class="flex items-center gap-3 p-2">
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10" data-alt="Profile picture of a recruiter" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCCmoIGdqE80auShoJkDGChmIB4DrOf1IQ0vaFKYOX7AGKphgefGV5o-2LwMCjrItNsnJy1wKzzfgGD25f1CHnl5CeVQD9OaHcHkMMypsWJDefUG1ErFL2v3V-HDDv_ZmoIUKruZ7dxlLP2nX4b4ZcVm7pC-oPjWUWlplrpfj40cSyERHXfWwdpVz8ymc-akLciztsma1YcpvdyorMNWtwe_8_X0dJyVXygwPfSlllbDL_JcsPabxqKBUUESoRfj4-MU1VZ19vPLjGW");'></div>
+<div class="flex flex-col">
+<h3 class="text-white text-base font-medium leading-tight">Alex Chen</h3>
+<p class="text-gray-400 text-sm font-normal leading-tight">Recruiter</p>
+</div>
+</div>
+</div>
+</aside>
+<!-- Main Content (Placeholder) -->
+<main class="flex-1 p-8">
+<h1 class="text-3xl font-bold text-gray-900 dark:text-white">Dashboard</h1>
+<p class="mt-2 text-gray-600 dark:text-gray-300">Welcome to your recruiter dashboard.</p>
+</main>
+</div>
+</body></html>

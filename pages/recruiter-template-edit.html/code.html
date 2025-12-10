@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <title>Edit Template - Stitch</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&amp;display=swap" rel="stylesheet" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+    rel="stylesheet" />
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "primary": "#46ec13",
+            "background-light": "#f6f8f6",
+            "background-dark": "#142210",
+          },
+          fontFamily: {
+            "display": ["Manrope"]
+          },
+          borderRadius: { "DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px" },
+        },
+      },
+    }
+  </script>
+  <style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 1;
+    }
+  </style>
+</head>
+
+<body class="bg-background-light dark:bg-background-dark font-display">
+  <div class="flex h-screen overflow-hidden">
+    <!-- Sidebar -->
+    <aside class="flex flex-col w-64 bg-[#142210] p-4 font-display flex-shrink-0 border-r border-[#2c4823]">
+      <div class="flex items-center gap-3 p-2 mb-6">
+        <div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10"
+          data-alt="Abstract green and black circular logo"
+          style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAtk02XUI2TjvCyvZJ55eiIaXagtiaUdmPVL8golyshCvOwCS99zCFsivZkCk1miLFdxIBEDjdqqALhfD7lEytt89hub5hDQ0XOjW3HYsW3KyI6mKR-tyW1VrVBDVeUmOX6a7HJOtyTGmHVfRqQi3lkOgwA612Kx7XV0BSqDr2v0Jar6NpELhRJ_GZywhEDHE822GsWriy4l4vNwCLPbA0uBek_pXak-Z4D1lBUtbO9q_SWEWgtOp7n4BZGzNhgpGFtkB8Tly_E6nt1");'>
+        </div>
+        <h1 class="text-white text-lg font-bold leading-normal">Stitch</h1>
+      </div>
+      <div class="flex flex-col gap-4 mb-auto">
+        <h2 class="text-gray-400 text-sm font-semibold uppercase px-3">Recruiter</h2>
+        <nav class="flex flex-col gap-2">
+          <!-- Inactive Link -->
+          <a class="flex items-center gap-3 px-3 py-2 rounded-full hover:bg-white/10 transition-colors duration-200 nav-link"
+            href="/pages/recruiter-dashboard.html/code.html">
+            <span class="material-symbols-outlined text-white text-2xl font-light">
+              grid_view
+            </span>
+            <p class="text-white text-sm font-medium leading-normal">Dashboard</p>
+          </a>
+          <!-- Active Link -->
+          <a aria-current="page" class="flex items-center gap-3 px-3 py-2 rounded-full bg-primary nav-link active"
+            href="/pages/recruiter-templates.html/code.html">
+            <span class="material-symbols-outlined text-background-dark text-2xl">
+              draft
+            </span>
+            <p class="text-background-dark text-sm font-bold leading-normal">Templates</p>
+          </a>
+          <a class="flex items-center gap-3 px-3 py-2 rounded-full hover:bg-white/10 transition-colors duration-200 nav-link"
+            href="#">
+            <span class="material-symbols-outlined text-white text-2xl font-light">
+              calendar_add_on
+            </span>
+            <p class="text-white text-sm font-medium leading-normal">Bookings</p>
+          </a>
+          <a class="flex items-center gap-3 px-3 py-2 rounded-full hover:bg-white/10 transition-colors duration-200 nav-link"
+            href="#">
+            <span class="material-symbols-outlined text-white text-2xl font-light">
+              bar_chart
+            </span>
+            <p class="text-white text-sm font-medium leading-normal">Insights</p>
+          </a>
+          <a class="flex items-center gap-3 px-3 py-2 rounded-full hover:bg-white/10 transition-colors duration-200 nav-link"
+            href="#">
+            <span class="material-symbols-outlined text-white text-2xl font-light">
+              settings
+            </span>
+            <p class="text-white text-sm font-medium leading-normal">Settings</p>
+          </a>
+        </nav>
+      </div>
+      <div class="mt-auto">
+        <div class="flex items-center gap-3 p-2">
+          <div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10"
+            data-alt="Profile picture of a recruiter"
+            style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCCmoIGdqE80auShoJkDGChmIB4DrOf1IQ0vaFKYOX7AGKphgefGV5o-2LwMCjrItNsnJy1wKzzfgGD25f1CHnl5CeVQD9OaHcHkMMypsWJDefUG1ErFL2v3V-HDDv_ZmoIUKruZ7dxlLP2nX4b4ZcVm7pC-oPjWUWlplrpfj40cSyERHXfWwdpVz8ymc-akLciztsma1YcpvdyorMNWtwe_8_X0dJyVXygwPfSlllbDL_JcsPabxqKBUUESoRfj4-MU1VZ19vPLjGW");'>
+          </div>
+          <div class="flex flex-col">
+            <h3 class="text-white text-base font-medium leading-tight">Alex Chen</h3>
+            <p class="text-gray-400 text-sm font-normal leading-tight">Recruiter</p>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <div class="flex flex-1 flex-col overflow-y-auto bg-background-light dark:bg-background-dark">
+      <!-- Header -->
+      <header
+        class="flex items-center justify-between w-full p-4 border-b border-[#2c4823] bg-background-light dark:bg-background-dark sticky top-0 z-10">
+        <div class="flex items-center gap-4">
+          <a href="/pages/recruiter-templates.html/code.html" class="text-white/60 hover:text-white">
+            <span class="material-symbols-outlined">arrow_back</span>
+          </a>
+          <h2 class="text-black dark:text-white text-lg font-bold">Edit Template</h2>
+        </div>
+        <div class="flex items-center gap-4">
+          <button
+            class="flex items-center justify-center w-10 h-10 rounded-full bg-[#2c4823] text-white hover:bg-[#2c4823]/80 transition-colors">
+            <span class="material-symbols-outlined">notifications</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- Main Content -->
+      <main class="flex-1 p-8">
+        <div class="flex flex-col lg:flex-row gap-8">
+          <!-- Form Area -->
+          <div class="flex-1 space-y-8">
+
+            <!-- Template Basics -->
+            <section class="bg-[#152211] border border-[#2c4823] rounded-2xl p-6">
+              <h3 class="text-white text-lg font-bold mb-4">Template Basics</h3>
+              <div class="grid grid-cols-1 gap-6">
+                <div>
+                  <label class="block text-[#9fc992] text-sm font-medium mb-2">Template Name</label>
+                  <input type="text"
+                    class="w-full bg-[#2c4823]/30 border border-[#2c4823] rounded-lg px-4 py-3 text-white focus:ring-primary focus:border-primary"
+                    value="Senior Frontend Dev">
+                </div>
+                <div>
+                  <label class="block text-[#9fc992] text-sm font-medium mb-2">Hiring Company</label>
+                  <input type="text"
+                    class="w-full bg-[#2c4823]/30 border border-[#2c4823] rounded-lg px-4 py-3 text-white focus:ring-primary focus:border-primary"
+                    value="TechCorp">
+                </div>
+                <div>
+                  <label class="block text-[#9fc992] text-sm font-medium mb-2">Interview Length (minutes)</label>
+                  <input type="number"
+                    class="w-full bg-[#2c4823]/30 border border-[#2c4823] rounded-lg px-4 py-3 text-white focus:ring-primary focus:border-primary"
+                    value="60">
+                </div>
+              </div>
+            </section>
+
+            <!-- Location -->
+            <section class="bg-[#152211] border border-[#2c4823] rounded-2xl p-6">
+              <h3 class="text-white text-lg font-bold mb-4">Location</h3>
+              <div class="flex gap-6 mb-4">
+                <label class="flex items-center gap-2 text-white cursor-pointer">
+                  <input type="radio" name="location"
+                    class="text-primary focus:ring-primary bg-[#2c4823]/30 border-[#2c4823]" checked>
+                  <span>Online</span>
+                </label>
+                <label class="flex items-center gap-2 text-white cursor-pointer">
+                  <input type="radio" name="location"
+                    class="text-primary focus:ring-primary bg-[#2c4823]/30 border-[#2c4823]">
+                  <span>In Person</span>
+                </label>
+              </div>
+              <div>
+                <label class="block text-[#9fc992] text-sm font-medium mb-2">Video Link / Platform</label>
+                <input type="text"
+                  class="w-full bg-[#2c4823]/30 border border-[#2c4823] rounded-lg px-4 py-3 text-white focus:ring-primary focus:border-primary"
+                  value="Google Meet">
+              </div>
+            </section>
+
+            <!-- Hiring Managers -->
+            <section class="bg-[#152211] border border-[#2c4823] rounded-2xl p-6">
+              <h3 class="text-white text-lg font-bold mb-4">Hiring Managers</h3>
+              <div class="flex flex-wrap gap-2 mb-4">
+                <span
+                  class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-[#2c4823] text-white">
+                  Sarah Jones
+                  <button class="ml-2 text-white/60 hover:text-white">×</button>
+                </span>
+                <span
+                  class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-[#2c4823] text-white">
+                  Mike Smith
+                  <button class="ml-2 text-white/60 hover:text-white">×</button>
+                </span>
+              </div>
+              <input type="text"
+                class="w-full bg-[#2c4823]/30 border border-[#2c4823] rounded-lg px-4 py-3 text-white focus:ring-primary focus:border-primary"
+                placeholder="Search managers to add...">
+            </section>
+
+            <!-- Candidate Briefing -->
+            <section class="bg-[#152211] border border-[#2c4823] rounded-2xl p-6">
+              <h3 class="text-white text-lg font-bold mb-4">Candidate Briefing</h3>
+              <div class="mb-4">
+                <label class="block text-[#9fc992] text-sm font-medium mb-2">Briefing Text</label>
+                <textarea
+                  class="w-full bg-[#2c4823]/30 border border-[#2c4823] rounded-lg px-4 py-3 text-white focus:ring-primary focus:border-primary h-32">Please prepare a short presentation about your past projects.</textarea>
+              </div>
+              <div>
+                <label class="block text-[#9fc992] text-sm font-medium mb-2">Attachment</label>
+                <div
+                  class="border-2 border-dashed border-[#2c4823] rounded-2xl p-8 flex flex-col items-center justify-center text-center cursor-pointer hover:border-primary/50 transition-colors bg-[#2c4823]/10 group">
+                  <span
+                    class="material-symbols-outlined text-4xl text-[#9fc992] group-hover:text-primary transition-colors mb-3">cloud_upload</span>
+                  <p class="text-white font-medium mb-1">Click to upload or drag and drop</p>
+                  <p class="text-[#9fc992] text-sm">PDF, DOCX up to 10MB</p>
+                  <input type="file" class="hidden">
+                </div>
+                <!-- File List Mock -->
+                <div class="flex items-center gap-3 p-3 bg-[#2c4823]/30 rounded-lg mt-4 border border-[#2c4823]">
+                  <span class="material-symbols-outlined text-[#9fc992]">description</span>
+                  <div class="flex-1">
+                    <p class="text-white text-sm font-medium">briefing_doc_v2.pdf</p>
+                    <p class="text-[#9fc992] text-xs">2.4 MB</p>
+                  </div>
+                  <button class="text-white/40 hover:text-white">
+                    <span class="material-symbols-outlined">close</span>
+                  </button>
+                </div>
+              </div>
+            </section>
+
+            <!-- Availability Rules -->
+            <section class="bg-[#152211] border border-[#2c4823] rounded-2xl p-6">
+              <h3 class="text-white text-lg font-bold mb-4">Availability Rules</h3>
+              <div class="grid grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-[#9fc992] text-sm font-medium mb-2">Days available</label>
+                  <select
+                    class="w-full bg-[#2c4823]/30 border border-[#2c4823] rounded-lg px-4 py-3 text-white focus:ring-primary focus:border-primary">
+                    <option>Mon - Fri</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-[#9fc992] text-sm font-medium mb-2">Hours</label>
+                  <select
+                    class="w-full bg-[#2c4823]/30 border border-[#2c4823] rounded-lg px-4 py-3 text-white focus:ring-primary focus:border-primary">
+                    <option>9:00 AM - 5:00 PM</option>
+                  </select>
+                </div>
+              </div>
+            </section>
+
+            <div class="flex items-center gap-4 pt-4">
+              <button
+                class="px-6 py-3 bg-primary text-[#142210] font-bold rounded-full hover:bg-primary/90 transition-colors">Save
+                Template</button>
+              <a href="/pages/recruiter-templates.html/code.html"
+                class="px-6 py-3 text-white font-bold hover:bg-white/10 rounded-full transition-colors">Cancel</a>
+            </div>
+
+          </div>
+
+          <!-- Summary Panel -->
+          <div class="w-full lg:w-80 flex-shrink-0">
+            <div class="bg-[#152211] border border-[#2c4823] rounded-2xl p-6 sticky top-24">
+              <h3 class="text-white text-lg font-bold mb-4">Summary</h3>
+              <div class="space-y-4">
+                <div class="flex justify-between items-center">
+                  <span class="text-[#9fc992] text-sm">Upcoming Slots</span>
+                  <span class="text-white font-bold">12</span>
+                </div>
+                <div class="flex justify-between items-center">
+                  <span class="text-[#9fc992] text-sm">Last Modified</span>
+                  <span class="text-white font-bold">2 hours ago</span>
+                </div>
+                <div class="border-t border-[#2c4823] pt-4">
+                  <p class="text-[#9fc992] text-sm mb-2">Assigned Managers</p>
+                  <ul class="space-y-2">
+                    <li class="flex items-center gap-2 text-white text-sm">
+                      <div class="w-6 h-6 rounded-full bg-gray-500"></div>
+                      Sarah Jones
+                    </li>
+                    <li class="flex items-center gap-2 text-white text-sm">
+                      <div class="w-6 h-6 rounded-full bg-gray-400"></div>
+                      Mike Smith
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <!-- Footer -->
+      <footer class="app-footer flex-shrink-0 px-10 pb-6">
+        <div class="border-t border-[#2c4823] pt-6">
+          <div class="flex flex-wrap items-center justify-between gap-6 text-sm">
+            <p class="text-[#9fc992] font-normal leading-normal">© 2023 Stitch by Google. All rights reserved.</p>
+            <div class="flex flex-wrap items-center justify-center gap-6">
+              <a class="text-[#9fc992] font-normal leading-normal hover:text-primary" href="#">Help</a>
+              <a class="text-[#9fc992] font-normal leading-normal hover:text-primary" href="#">Terms of Service</a>
+              <a class="text-[#9fc992] font-normal leading-normal hover:text-primary" href="#">Privacy Policy</a>
+            </div>
+          </div>
+        </div>
+      </footer>
+    </div>
+  </div>
+</body>
+
+</html>

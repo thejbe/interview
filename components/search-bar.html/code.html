@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Search Bar Component</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary": "#46ec13",
+              "background-light": "#f6f8f6",
+              "background-dark": "#142210",
+            },
+            fontFamily: {
+              "display": ["Manrope", "sans-serif"]
+            },
+            borderRadius: {"DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+      .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      }
+    </style>
+</head>
+<body class="font-display bg-background-light dark:bg-background-dark">
+<div class="relative flex h-auto min-h-screen w-full flex-col overflow-x-hidden">
+<div class="layout-container flex h-full grow flex-col">
+<div class="flex flex-1 justify-center py-10 px-4">
+<div class="layout-content-container flex flex-col w-full max-w-[960px] flex-1">
+<div class="w-full max-w-md mx-auto">
+<form class="group">
+<label class="flex flex-col w-full">
+<div class="relative flex w-full flex-1 items-stretch rounded-full h-14 bg-[#233320] ring-1 ring-transparent focus-within:ring-primary transition-all duration-300">
+<div class="text-[#98A895] flex items-center justify-center pl-5 pr-2 group-focus-within:text-primary transition-colors duration-300">
+<span class="material-symbols-outlined text-2xl">search</span>
+</div>
+<input aria-label="Search" class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-full text-white focus:outline-0 focus:ring-0 border-none bg-transparent h-full placeholder:text-[#98A895] px-2 text-base font-normal leading-normal" placeholder="Search templates, bookings, managers…" type="search"/>
+</div>
+</label>
+</form>
+</div>
+</div>
+</div>
+</div>
+</div>
+</body></html>
