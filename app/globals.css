@@ -1,0 +1,46 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #46ec13;
+  --color-background-light: #f6f8f6;
+  --color-background-dark: #142210;
+
+  --font-display: var(--font-manrope), sans-serif;
+  
+  --radius-lg: 2rem;
+  --radius-xl: 3rem;
+}
+
+:root {
+  --background: #f6f8f6;
+  --foreground: #142210;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #142210;
+    --foreground: #f6f8f6;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-display);
+}
+
+/* Material Symbols support */
+.material-symbols-outlined {
+  font-family: 'Material Symbols Outlined';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px;  /* Preferred icon size */
+  display: inline-block;
+  line-height: 1;
+  text-transform: none;
+  letter-spacing: normal;
+  word-wrap: normal;
+  white-space: nowrap;
+  direction: ltr;
+  font-variation-settings: 'FILL' 1;
+}
