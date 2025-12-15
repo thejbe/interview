@@ -40,6 +40,17 @@ export function SidebarRecruiter() {
                         <p className={`text-sm font-bold leading-normal ${isActive('/recruiter/templates') ? 'text-background-dark' : 'text-white'}`}>Templates</p>
                     </Link>
 
+                    {/* Clients */}
+                    <Link
+                        href="/recruiter/clients"
+                        className={`flex items-center gap-3 px-3 py-2 rounded-full transition-colors duration-200 nav-link ${isActive('/recruiter/clients') ? 'bg-primary' : 'hover:bg-white/10'}`}
+                    >
+                        <span className={`material-symbols-outlined text-2xl ${isActive('/recruiter/clients') ? 'text-background-dark' : 'text-white font-light'}`}>
+                            domain
+                        </span>
+                        <p className={`text-sm font-bold leading-normal ${isActive('/recruiter/clients') ? 'text-background-dark' : 'text-white'}`}>Clients</p>
+                    </Link>
+
                     {/* Placeholders */}
                     <Link href="#" className="flex items-center gap-3 px-3 py-2 rounded-full hover:bg-white/10 transition-colors duration-200 nav-link">
                         <span className="material-symbols-outlined text-white text-2xl font-light">calendar_add_on</span>
