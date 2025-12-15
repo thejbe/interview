@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
 
@@ -21,6 +21,12 @@ export function AvailabilityGrid({ initialSlots, managerId }: AvailabilityGridPr
     const [slots, setSlots] = useState<Slot[]>(initialSlots);
     const router = useRouter();
     const supabase = createClient();
+
+    // Drag State
+    const [isDragging, setIsDragging] = useState(false);
+    const dragMode = useRef<'open' | 'blocked' | null>(null);
+    const pendingUpdates = useRef<Map<string, Partial<Slot>>>(new Map()); // Map ID -> Changes
+    const pendingInserts = useRef<any[]>([]); // List of new slots to insert
 
     const hours = [9, 10, 11, 12, 13, 14, 15, 16]; // 9 AM to 5 PM
     const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
@@ -44,72 +50,132 @@ export function AvailabilityGrid({ initialSlots, managerId }: AvailabilityGridPr
         });
     };
 
-    const handleSlotClick = async (dayIndex: number, hour: number) => {
+    // -- Drag & Update Logic --
+
+    const updateSlot = (dayIndex: number, hour: number, mode: 'open' | 'blocked') => {
         const existingSlot = getSlot(dayIndex, hour);
 
+        // Optimistic Update Data
+        let match = false;
         if (existingSlot) {
-            // Toggle logic: Open -> Blocked -> Delete (Available by default?)
-            // Actually: 
-            // Manual Free (Open, Source Override) -> Manual Busy (Blocked, Source Override) -> Clear (Back to Calendar default or Empty)
+            // If it already matches our desired mode, skip
+            if (existingSlot.status === mode && existingSlot.source === 'override') match = true;
+        }
 
-            let newStatus: 'open' | 'blocked' = 'blocked';
-            let action = 'update';
+        if (match) return; // No change needed
 
-            if (existingSlot.status === 'open') {
-                newStatus = 'blocked';
-            } else if (existingSlot.status === 'blocked') {
-                // Remove override, revert to empty/calendar
-                action = 'delete';
-            } else {
-                newStatus = 'open';
-            }
+        if (existingSlot) {
+            // Update Existing
+            const updatedSlot: Slot = { ...existingSlot, status: mode, source: 'override' };
+            setSlots(prev => prev.map(s => s.id === existingSlot.id ? updatedSlot : s));
 
-            const optimisticSlot: Slot = { ...existingSlot, status: newStatus, source: 'override' };
-
-            if (action === 'delete') {
-                setSlots(prev => prev.filter(s => s.id !== existingSlot.id));
-                await supabase.from('slots').delete().eq('id', existingSlot.id);
-            } else {
-                setSlots(prev => prev.map(s => s.id === existingSlot.id ? optimisticSlot : s));
-                await supabase.from('slots').update({ status: newStatus, source: 'override' }).eq('id', existingSlot.id);
-            }
-
+            // Track for DB
+            pendingUpdates.current.set(existingSlot.id, { status: mode, source: 'override' });
         } else {
-            // Create new slot -> 'open' (Manual Free)
-            // Calculate timestamp
+            // Create New
             const d = new Date();
-            // Calculate next Monday
             const dayOfWeek = d.getDay();
             const diff = d.getDate() - dayOfWeek + (dayOfWeek == 0 ? -6 : 1) + 7; // Next Monday
             const monday = new Date(d.setDate(diff));
             monday.setHours(hour, 0, 0, 0);
-            monday.setDate(monday.getDate() + dayIndex); // Add day offset
+            monday.setDate(monday.getDate() + dayIndex);
 
             const startTime = monday.toISOString();
             monday.setHours(hour + 1);
             const endTime = monday.toISOString();
 
-            const newSlotData = {
+            const tempId = `temp-${Date.now()}-${Math.random()}`;
+            const newSlot: Slot = {
+                id: tempId,
+                start_time: startTime,
+                end_time: endTime,
+                status: mode,
+                source: 'override'
+            } as Slot; // Casting because ID is temp
+
+            setSlots(prev => [...prev, newSlot]);
+
+            // Track for insert
+            // We need to distinguish this from updates. Ideally we push to pendingInserts.
+            // But if we drag over it again?
+            // Since it's temp, we can store it in a map. If we change it again, we update the map entry.
+            // Actually, simpler: just treat everything as "last state wins".
+            // For inserts, we need the payload.
+            pendingInserts.current.push({
+                tempId,
                 hiring_manager_id: managerId,
                 start_time: startTime,
                 end_time: endTime,
-                status: 'open',
+                status: mode,
                 source: 'override'
-            };
+            });
+        }
+    };
 
-            // Optimistic insert placeholder
-            const tempId = Math.random().toString();
-            const optimistic: Slot = { ...newSlotData, id: tempId } as Slot;
-            setSlots(prev => [...prev, optimistic]);
+    const commitChanges = async () => {
+        const updates = Array.from(pendingUpdates.current.entries()).map(([id, changes]) => ({
+            id,
+            ...changes
+        }));
 
-            const { data, error } = await supabase.from('slots').insert(newSlotData).select().single();
-            if (data) {
-                setSlots(prev => prev.map(s => s.id === tempId ? data : s));
-            }
+        const inserts = pendingInserts.current;
+
+        // Clear refs immediately to avoid double send
+        pendingUpdates.current = new Map();
+        pendingInserts.current = [];
+
+        if (updates.length > 0) {
+            // Upsert or Update (Upsert works if we have all fields, but we only have partial. Update is safer for partial)
+            // Supabase doesn't support bulk update with different values easily without upsert.
+            // For V1, Promise.all is acceptable.
+            await Promise.all(updates.map(u => supabase.from('slots').update(u).eq('id', u.id)));
+        }
+
+        if (inserts.length > 0) {
+            // Clean tempIds
+            const cleanInserts = inserts.map(({ tempId, ...rest }) => rest);
+            await supabase.from('slots').insert(cleanInserts);
         }
 
         router.refresh();
     };
+
+    // -- Mouse Handlers --
+
+    const handleMouseDown = (dayIndex: number, hour: number) => {
+        setIsDragging(true);
+        const slot = getSlot(dayIndex, hour);
+
+        // Determine Mode
+        // If empty or blocked -> Open
+        // If open -> Blocked
+        const initialMode = (slot?.status === 'open') ? 'blocked' : 'open';
+        dragMode.current = initialMode;
+
+        updateSlot(dayIndex, hour, initialMode);
+    };
+
+    const handleMouseEnter = (dayIndex: number, hour: number) => {
+        if (!isDragging || !dragMode.current) return;
+        updateSlot(dayIndex, hour, dragMode.current);
+    };
+
+    const handleMouseUp = async () => {
+        setIsDragging(false);
+        dragMode.current = null;
+        await commitChanges();
+    };
+
+    // Global MouseUp to catch drag release outside grid
+    useEffect(() => {
+        const handleGlobalMouseUp = () => {
+            if (isDragging) {
+                handleMouseUp();
+            }
+        };
+        window.addEventListener('mouseup', handleGlobalMouseUp);
+        return () => window.removeEventListener('mouseup', handleGlobalMouseUp);
+    }, [isDragging]);
 
     return (
         <div className="bg-[#152211] border border-[#2c4823] rounded-2xl p-6">
@@ -161,8 +227,9 @@ export function AvailabilityGrid({ initialSlots, managerId }: AvailabilityGridPr
                             return (
                                 <button
                                     key={`${dayIndex}-${hour}`}
-                                    onClick={() => handleSlotClick(dayIndex, hour)}
-                                    className={`rounded p-1 h-10 flex items-center justify-center cursor-pointer transition-colors w-full ${slotClass}`}
+                                    onMouseDown={() => handleMouseDown(dayIndex, hour)}
+                                    onMouseEnter={() => handleMouseEnter(dayIndex, hour)}
+                                    className={`rounded p-1 h-10 flex items-center justify-center cursor-pointer transition-colors w-full select-none ${slotClass}`}
                                 >
                                     {/* Gradient overlay for Manual Busy */}
                                     {slot?.status === 'blocked' && slot.source === 'override' && (

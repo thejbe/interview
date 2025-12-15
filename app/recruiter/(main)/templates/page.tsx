@@ -14,6 +14,7 @@ export default async function TemplatesPage() {
       *,
       companies ( name ),
       template_hiring_managers (
+        availability_status,
         hiring_managers ( name, email, role )
       )
     `)
@@ -44,51 +45,79 @@ export default async function TemplatesPage() {
                                 <th scope="col" className="px-6 py-3">Length</th>
                                 <th scope="col" className="px-6 py-3">Location</th>
                                 <th scope="col" className="px-6 py-3">Managers</th>
+                                <th scope="col" className="px-6 py-3">Availability</th>
                                 <th scope="col" className="px-6 py-3">Status</th>
                                 <th scope="col" className="px-6 py-3 text-right">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             {templates && templates.length > 0 ? (
-                                templates.map((template) => (
-                                    <tr key={template.id} className="border-b border-[#2c4823] hover:bg-[#2c4823]/10">
-                                        <td className="px-6 py-4 font-medium text-white">{template.name}</td>
-                                        <td className="px-6 py-4">
-                                            {/* @ts-ignore - relational data types usually inferred but explicit types pending */}
-                                            {template.companies?.name || 'Unknown'}
-                                        </td>
-                                        <td className="px-6 py-4">{template.interview_length_minutes} min</td>
-                                        <td className="px-6 py-4 capitalize">{template.location_type?.replace('_', ' ')}</td>
-                                        <td className="px-6 py-4">
-                                            <div className="flex -space-x-2">
-                                                {/* @ts-ignore */}
-                                                {template.template_hiring_managers?.slice(0, 3).map((thm: any, idx: number) => (
-                                                    <div key={idx}
-                                                        title={`${thm.hiring_managers?.name} ${thm.hiring_managers?.role ? `(${thm.hiring_managers.role})` : ''}`}
-                                                        className="w-6 h-6 rounded-full bg-gray-500 border border-[#152211] flex items-center justify-center text-xs text-white">
-                                                        {thm.hiring_managers?.name?.[0] || 'U'}
+                                templates.map((template) => {
+                                    const managers = template.template_hiring_managers || [];
+                                    const total = managers.length;
+                                    const provided = managers.filter((m: any) => m.availability_status === 'provided').length;
+                                    const pending = managers.filter((m: any) => m.availability_status === 'pending').length;
+
+                                    // Status Logic
+                                    let statusColor = 'bg-gray-700 text-gray-300';
+                                    if (total > 0 && provided === total) statusColor = 'bg-green-900 text-green-300';
+                                    else if (pending < total) statusColor = 'bg-yellow-900 text-yellow-300';
+
+                                    return (
+                                        <tr key={template.id} className="border-b border-[#2c4823] hover:bg-[#2c4823]/10">
+                                            <td className="px-6 py-4 font-medium text-white">{template.name}</td>
+                                            <td className="px-6 py-4">
+                                                {/* @ts-ignore - relational data types usually inferred but explicit types pending */}
+                                                {template.companies?.name || 'Unknown'}
+                                            </td>
+                                            <td className="px-6 py-4">{template.interview_length_minutes} min</td>
+                                            <td className="px-6 py-4 capitalize">{template.location_type?.replace('_', ' ')}</td>
+                                            <td className="px-6 py-4">
+                                                <div className="flex -space-x-2">
+                                                    {/* @ts-ignore */}
+                                                    {template.template_hiring_managers?.slice(0, 3).map((thm: any, idx: number) => (
+                                                        <div key={idx}
+                                                            title={`${thm.hiring_managers?.name} ${thm.hiring_managers?.role ? `(${thm.hiring_managers.role})` : ''} - ${thm.availability_status}`}
+                                                            className={`w-6 h-6 rounded-full border border-[#152211] flex items-center justify-center text-xs text-white ${thm.availability_status === 'provided' ? 'bg-green-700' : (thm.availability_status === 'requested' ? 'bg-yellow-700' : 'bg-gray-500')}`}>
+                                                            {thm.hiring_managers?.name?.[0] || 'U'}
+                                                        </div>
+                                                    ))}
+                                                    {/* @ts-ignore */}
+                                                    {(template.template_hiring_managers?.length || 0) > 3 && (
+                                                        <div className="w-6 h-6 rounded-full bg-gray-700 border border-[#152211] flex items-center justify-center text-[10px] text-white">
+                                                            +{(template.template_hiring_managers?.length || 0) - 3}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                {total > 0 ? (
+                                                    <div className="flex flex-col gap-1">
+                                                        <div className="flex items-center justify-between text-xs">
+                                                            <span className={provided === total ? "text-green-400" : "text-white"}>{provided}/{total} Set</span>
+                                                            {pending > 0 && <span className="text-red-400 text-[10px]">{pending} Pending</span>}
+                                                        </div>
+                                                        <div className="w-20 h-1.5 bg-gray-700 rounded-full overflow-hidden">
+                                                            <div className="h-full bg-primary transition-all duration-500" style={{ width: `${(provided / total) * 100}%` }}></div>
+                                                        </div>
                                                     </div>
-                                                ))}
-                                                {/* @ts-ignore */}
-                                                {(template.template_hiring_managers?.length || 0) > 3 && (
-                                                    <div className="w-6 h-6 rounded-full bg-gray-700 border border-[#152211] flex items-center justify-center text-[10px] text-white">
-                                                        +{(template.template_hiring_managers?.length || 0) - 3}
-                                                    </div>
+                                                ) : (
+                                                    <span className="text-xs text-gray-500">No managers</span>
                                                 )}
-                                            </div>
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            <span className={`text-xs font-medium px-2.5 py-0.5 rounded ${template.active ? 'bg-green-900 text-green-300' : 'bg-red-900 text-red-300'}`}>
-                                                {template.active ? 'Active' : 'Inactive'}
-                                            </span>
-                                        </td>
-                                        <td className="px-6 py-4 text-right">
-                                            <Link href={`/recruiter/templates/${template.id}`} className="text-primary hover:underline mr-3">
-                                                Edit
-                                            </Link>
-                                        </td>
-                                    </tr>
-                                ))
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                <span className={`text-xs font-medium px-2.5 py-0.5 rounded ${template.active ? 'bg-green-900 text-green-300' : 'bg-red-900 text-red-300'}`}>
+                                                    {template.active ? 'Active' : 'Inactive'}
+                                                </span>
+                                            </td>
+                                            <td className="px-6 py-4 text-right">
+                                                <Link href={`/recruiter/templates/${template.id}`} className="text-primary hover:underline mr-3">
+                                                    Edit
+                                                </Link>
+                                            </td>
+                                        </tr>
+                                    )
+                                })
                             ) : (
                                 <tr>
                                     <td colSpan={7} className="px-6 py-8 text-center text-[#9fc992]">

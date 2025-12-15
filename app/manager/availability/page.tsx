@@ -1,13 +1,20 @@
 import { createClient } from '@/lib/supabase/server';
 import { AvailabilityGrid } from '@/app/components/manager/AvailabilityGrid';
 import { Button } from '@/app/components/ui/Button';
+import { markAvailabilityProvided, markAllRequestsProvided } from '@/app/manager/actions';
+import { redirect } from 'next/navigation';
+import { revalidatePath } from 'next/cache';
 
-export default async function ManagerAvailabilityPage() {
+interface PageProps {
+    searchParams: Promise<{ template_id?: string }>;
+}
+
+export default async function ManagerAvailabilityPage({ searchParams }: PageProps) {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
+    const { template_id } = await searchParams;
 
     if (!user) {
-        // Middleware should handle this, but safe check
         return <div>Access Denied</div>;
     }
 
@@ -18,13 +25,46 @@ export default async function ManagerAvailabilityPage() {
     if (manager) {
         const { data } = await supabase.from('slots').select('*').eq('hiring_manager_id', manager.id);
         slots = data || [];
-    } else {
-        // If manager profile doesn't exist yet (first login?), created placeholders or handle error?
-        // We will assume creation happens elsewhere or we just show empty.
+    }
+
+    // Fetch Template Context if ID provided
+    let templateContext = null;
+    if (template_id) {
+        const { data } = await supabase.from('interview_templates').select('name').eq('id', template_id).single();
+        templateContext = data;
+    }
+
+    async function handleDone() {
+        'use server';
+        if (template_id && manager?.id) {
+            await markAvailabilityProvided(template_id, manager.id);
+            redirect('/manager/availability'); // clear params
+        } else if (manager?.id) {
+            // General save - mark all as provided
+            await markAllRequestsProvided(manager.id);
+            revalidatePath('/manager/availability');
+            redirect('/manager/availability');
+        }
     }
 
     return (
         <div>
+            {/* Request Context Banner */}
+            {templateContext && (
+                <div className="bg-primary/10 border border-primary rounded-2xl p-6 mb-8 flex flex-col md:flex-row items-center justify-between gap-4">
+                    <div>
+                        <h2 className="text-xl font-bold text-white mb-1">Availability Request</h2>
+                        <p className="text-[#9fc992]">Please set your availability for the <span className="text-white font-bold">{templateContext.name}</span> interview loop.</p>
+                    </div>
+                    <form action={handleDone}>
+                        <Button type="submit">
+                            <span className="material-symbols-outlined mr-2">check_circle</span>
+                            I'm Done
+                        </Button>
+                    </form>
+                </div>
+            )}
+
             <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-8">Availability Management</h1>
 
             {/* Calendar Connection */}
@@ -55,6 +95,16 @@ export default async function ManagerAvailabilityPage() {
 
             {/* Grid */}
             <AvailabilityGrid initialSlots={slots} managerId={manager?.id || ''} />
+
+            {/* Bottom Save Action - Always visible now */}
+            <div className="mt-8 flex justify-end pb-12">
+                <form action={handleDone}>
+                    <Button type="submit" className="px-8 font-bold text-lg">
+                        <span className="material-symbols-outlined mr-2">check_circle</span>
+                        Save Availability
+                    </Button>
+                </form>
+            </div>
         </div>
     );
 }
