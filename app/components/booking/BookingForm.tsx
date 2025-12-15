@@ -11,6 +11,7 @@ interface Slot {
     start_time: string;
     end_time: string;
     status: string;
+    additional_slot_ids?: string[];
 }
 
 interface BookingFormProps {
@@ -32,21 +33,28 @@ export function BookingForm({ slots, briefingText, files }: BookingFormProps) {
         setLoading(true);
 
         try {
+            const selectedSlot = slots.find(s => s.id === selectedSlotId);
+            const additionalIds = selectedSlot?.additional_slot_ids || [];
+
             // 1. Create booking
             const token = Math.random().toString(36).substring(7); // Simple token generation
+
+            // Insert Booking
             const { error: bookingError } = await supabase.from('bookings').insert({
                 slot_id: selectedSlotId,
                 candidate_name: formData.name,
                 candidate_email: formData.email,
                 candidate_phone: formData.phone,
                 token: token,
-                status: 'confirmed'
+                status: 'confirmed',
+                additional_slot_ids: additionalIds
             });
 
             if (bookingError) throw bookingError;
 
-            // 2. Update slot status
-            await supabase.from('slots').update({ status: 'booked' }).eq('id', selectedSlotId);
+            // 2. Update slot statuses (Primary + Additional)
+            const allSlotIds = [selectedSlotId, ...additionalIds];
+            await supabase.from('slots').update({ status: 'booked' }).in('id', allSlotIds);
 
             setConfirmed(true);
         } catch (err: any) {

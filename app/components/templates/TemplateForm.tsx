@@ -40,9 +40,21 @@ export function TemplateForm({ initialData, companies, managers, mode }: Templat
     const [locationType, setLocationType] = useState<'online' | 'in_person'>(initialData?.location_type || 'online');
     const [onlineLink, setOnlineLink] = useState(initialData?.online_link || '');
     const [inPersonLocation, setInPersonLocation] = useState(initialData?.in_person_location || '');
-    const [selectedManagers, setSelectedManagers] = useState<string[]>(
-        initialData?.template_hiring_managers?.map((thm: any) => thm.hiring_manager_id) || []
+    const [requiredCount, setRequiredCount] = useState(initialData?.required_interviewers_count || 1);
+
+    // selectedManagers now holds objects with config
+    interface SelectedManagerConfig {
+        id: string;
+        role_type: 'mandatory' | 'at_least_one' | 'optional';
+    }
+
+    const [selectedManagers, setSelectedManagers] = useState<SelectedManagerConfig[]>(
+        initialData?.template_hiring_managers?.sort((a: any, b: any) => (a.list_order || 0) - (b.list_order || 0)).map((thm: any) => ({
+            id: thm.hiring_manager_id,
+            role_type: thm.role_type || 'mandatory'
+        })) || []
     );
+
     const [briefingText, setBriefingText] = useState(initialData?.candidate_briefing_text || '');
     // const [file, setFile] = useState<File | null>(null); // For file upload
 
@@ -54,7 +66,30 @@ export function TemplateForm({ initialData, companies, managers, mode }: Templat
     const [newMgrRole, setNewMgrRole] = useState('');
     const [createMgrLoading, setCreateMgrLoading] = useState(false);
 
-    const handleAddManager = async () => {
+    // Handlers for Panel Config
+    const addManager = (id: string) => {
+        if (selectedManagers.find(m => m.id === id)) return;
+        setSelectedManagers(prev => [...prev, { id, role_type: 'mandatory' }]);
+    };
+
+    const removeManager = (id: string) => {
+        setSelectedManagers(prev => prev.filter(m => m.id !== id));
+    };
+
+    const updateManagerRole = (id: string, role: 'mandatory' | 'at_least_one' | 'optional') => {
+        setSelectedManagers(prev => prev.map(m => m.id === id ? { ...m, role_type: role } : m));
+    };
+
+    const moveManager = (index: number, direction: number) => {
+        const newManagers = [...selectedManagers];
+        const newIndex = index + direction;
+        if (newIndex < 0 || newIndex >= newManagers.length) return;
+
+        [newManagers[index], newManagers[newIndex]] = [newManagers[newIndex], newManagers[index]];
+        setSelectedManagers(newManagers);
+    };
+
+    const handleCreateAndAddManager = async () => {
         if (!newMgrName || !newMgrEmail) return;
         setCreateMgrLoading(true);
         try {
@@ -68,7 +103,8 @@ export function TemplateForm({ initialData, companies, managers, mode }: Templat
             if (error) throw error;
 
             setAllManagers(prev => [...prev, data]);
-            setSelectedManagers(prev => [...prev, data.id]);
+            // Add as mandatory by default
+            setSelectedManagers(prev => [...prev, { id: data.id, role_type: 'mandatory' }]);
 
             // Reset
             setNewMgrName('');
@@ -95,6 +131,7 @@ export function TemplateForm({ initialData, companies, managers, mode }: Templat
                 online_link: locationType === 'online' ? onlineLink : null,
                 in_person_location: locationType === 'in_person' ? inPersonLocation : null,
                 candidate_briefing_text: briefingText,
+                required_interviewers_count: requiredCount,
                 // created_by_recruiter_id: derived from session in RLS or backend trigger? For now assumes RLS handles user mapping or we insert explicit recruiter id if we had it
             };
 
@@ -140,9 +177,11 @@ export function TemplateForm({ initialData, companies, managers, mode }: Templat
             }
 
             if (selectedManagers.length > 0) {
-                const managerLinks = selectedManagers.map(mid => ({
+                const managerLinks = selectedManagers.map((sm, index) => ({
                     template_id: result.id,
-                    hiring_manager_id: mid
+                    hiring_manager_id: sm.id,
+                    role_type: sm.role_type,
+                    list_order: index
                 }));
                 await supabase.from('template_hiring_managers').insert(managerLinks);
             }
@@ -157,14 +196,6 @@ export function TemplateForm({ initialData, companies, managers, mode }: Templat
             alert('Error saving template: ' + err.message);
         } finally {
             setLoading(false);
-        }
-    };
-
-    const toggleManager = (id: string) => {
-        if (selectedManagers.includes(id)) {
-            setSelectedManagers(prev => prev.filter(m => m !== id));
-        } else {
-            setSelectedManagers(prev => [...prev, id]);
         }
     };
 
@@ -232,55 +263,108 @@ export function TemplateForm({ initialData, companies, managers, mode }: Templat
                     )}
                 </section>
 
-                {/* Hiring Managers */}
+                {/* Hiring Managers & Panel Configuration */}
                 <section className="bg-[#152211] border border-[#2c4823] rounded-2xl p-6">
-                    <h3 className="text-white text-lg font-bold mb-4">Hiring Managers</h3>
-                    <div className="flex flex-wrap gap-2 mb-4">
-                        {selectedManagers.map(id => {
-                            const mgr = allManagers.find(m => m.id === id);
+                    <h3 className="text-white text-lg font-bold mb-4">Panel Configuration</h3>
+
+                    <div className="mb-6">
+                        <Input
+                            label="Required Interviewers Count (Total)"
+                            type="number"
+                            min={1}
+                            value={requiredCount}
+                            onChange={e => setRequiredCount(Number(e.target.value))}
+                        />
+                        <p className="text-xs text-[#9fc992] mt-1">
+                            How many interviewers must be present in the meeting? Verify this matches your manager rules below.
+                        </p>
+                    </div>
+
+                    <h4 className="text-white text-md font-bold mb-3">Selected Interviewers</h4>
+
+                    {selectedManagers.length === 0 && (
+                        <p className="text-[#9fc992] text-sm mb-4 italic">No interviewers selected yet.</p>
+                    )}
+
+                    <div className="space-y-3 mb-6">
+                        {selectedManagers.map((sm, index) => {
+                            const mgr = allManagers.find(m => m.id === sm.id);
                             return (
-                                <span key={id} className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-[#2c4823] text-white">
-                                    {mgr?.name || id} {mgr?.role ? `(${mgr.role})` : ''}
-                                    <button type="button" onClick={() => toggleManager(id)} className="ml-2 text-white/60 hover:text-white">×</button>
-                                </span>
+                                <div key={sm.id} className="bg-[#2c4823]/20 border border-[#2c4823] rounded-lg p-3 flex flex-col md:flex-row items-center justify-between gap-4">
+                                    <div className="flex items-center gap-3">
+                                        <span className="flex items-center justify-center w-6 h-6 rounded-full bg-[#2c4823] text-xs text-white">
+                                            {index + 1}
+                                        </span>
+                                        <div>
+                                            <div className="text-white font-medium">
+                                                {mgr?.name || 'Unknown'} <span className="text-white/60 text-sm">({mgr?.role || 'No Role'})</span>
+                                            </div>
+                                            <div className="text-xs text-[#9fc992]">{mgr?.email}</div>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex items-center gap-3">
+                                        <select
+                                            className="bg-[#152211] border border-[#2c4823] text-white text-sm rounded px-2 py-1 focus:ring-primary focus:border-primary"
+                                            value={sm.role_type}
+                                            onChange={(e) => updateManagerRole(sm.id, e.target.value as any)}
+                                        >
+                                            <option value="mandatory">Mandatory</option>
+                                            <option value="at_least_one">At Least One</option>
+                                            <option value="optional">Optional</option>
+                                        </select>
+
+                                        <button type="button" onClick={() => moveManager(index, -1)} disabled={index === 0} className="text-white/40 hover:text-white disabled:opacity-20">
+                                            <span className="material-symbols-outlined text-lg">arrow_upward</span>
+                                        </button>
+                                        <button type="button" onClick={() => moveManager(index, 1)} disabled={index === selectedManagers.length - 1} className="text-white/40 hover:text-white disabled:opacity-20">
+                                            <span className="material-symbols-outlined text-lg">arrow_downward</span>
+                                        </button>
+                                        <button type="button" onClick={() => removeManager(sm.id)} className="text-red-400 hover:text-red-300 ml-2">
+                                            <span className="material-symbols-outlined text-lg">close</span>
+                                        </button>
+                                    </div>
+                                </div>
                             );
                         })}
                     </div>
 
-                    <div className="mt-2 text-sm text-[#9fc992]">Available Managers:</div>
-                    <div className="flex flex-wrap gap-2 mt-1 mb-4">
-                        {allManagers.filter(m => !selectedManagers.includes(m.id)).map(m => (
-                            <button key={m.id} type="button" onClick={() => toggleManager(m.id)}
-                                className="px-3 py-1 rounded-full border border-[#2c4823] text-white text-sm hover:bg-[#2c4823]">
-                                + {m.name} {m.role ? `(${m.role})` : ''}
-                            </button>
-                        ))}
-                    </div>
-
-                    {!isAddingManager ? (
-                        <button type="button" onClick={() => setIsAddingManager(true)}
-                            className="text-sm text-primary hover:underline flex items-center">
-                            <span className="material-symbols-outlined text-sm mr-1">add</span>
-                            Add new manager
-                        </button>
-                    ) : (
-                        <div className="bg-[#2c4823]/20 p-4 rounded-lg border border-[#2c4823]">
-                            <h4 className="text-white text-sm font-bold mb-3">New Manager</h4>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
-                                <Input label="Name" value={newMgrName} onChange={e => setNewMgrName(e.target.value)} placeholder="e.g. John Doe" />
-                                <Input label="Email" value={newMgrEmail} onChange={e => setNewMgrEmail(e.target.value)} placeholder="e.g. john@company.com" />
-                                <Input label="Role (Optional)" value={newMgrRole} onChange={e => setNewMgrRole(e.target.value)} placeholder="e.g. Engineering Manager" />
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <Button type="button" className="px-3 py-1 text-sm h-8" onClick={handleAddManager} disabled={createMgrLoading}>
-                                    {createMgrLoading ? 'Adding...' : 'Add Manager'}
-                                </Button>
-                                <button type="button" onClick={() => setIsAddingManager(false)} className="text-white/60 text-sm hover:text-white px-3">
-                                    Cancel
+                    <div className="border-t border-[#2c4823] pt-4">
+                        <div className="text-sm text-[#9fc992] mb-2">Add Interviewer:</div>
+                        <div className="flex flex-wrap gap-2 mb-4">
+                            {allManagers.filter(m => !selectedManagers.find(sm => sm.id === m.id)).map(m => (
+                                <button key={m.id} type="button" onClick={() => addManager(m.id)}
+                                    className="px-3 py-1 rounded-full border border-[#2c4823] text-white text-sm hover:bg-[#2c4823] transition-colors">
+                                    + {m.name}
                                 </button>
-                            </div>
+                            ))}
                         </div>
-                    )}
+
+                        {!isAddingManager ? (
+                            <button type="button" onClick={() => setIsAddingManager(true)}
+                                className="text-sm text-primary hover:underline flex items-center">
+                                <span className="material-symbols-outlined text-sm mr-1">person_add</span>
+                                Create new manager
+                            </button>
+                        ) : (
+                            <div className="bg-[#2c4823]/20 p-4 rounded-lg border border-[#2c4823] mt-2">
+                                <h4 className="text-white text-sm font-bold mb-3">New Manager</h4>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
+                                    <Input label="Name" value={newMgrName} onChange={e => setNewMgrName(e.target.value)} placeholder="e.g. John Doe" />
+                                    <Input label="Email" value={newMgrEmail} onChange={e => setNewMgrEmail(e.target.value)} placeholder="e.g. john@company.com" />
+                                    <Input label="Role (Optional)" value={newMgrRole} onChange={e => setNewMgrRole(e.target.value)} placeholder="e.g. Engineering Manager" />
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <Button type="button" className="px-3 py-1 text-sm h-8" onClick={handleCreateAndAddManager} disabled={createMgrLoading}>
+                                        {createMgrLoading ? 'Adding...' : 'Add & Select'}
+                                    </Button>
+                                    <button type="button" onClick={() => setIsAddingManager(false)} className="text-white/60 text-sm hover:text-white px-3">
+                                        Cancel
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+                    </div>
                 </section>
 
                 {/* Candidate Briefing */}
