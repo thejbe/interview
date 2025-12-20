@@ -7,10 +7,28 @@ interface PageProps {
 
 export default async function BookingPage({ params }: PageProps) {
     const { token } = await params;
-    const templateId = token; // Assuming token is templateId for V1
     const supabase = await createClient();
 
-    // Fetch template
+    let templateId = token;
+    let booking = null;
+
+    // 1. Try to find an invite/booking with this token
+    const { data: bookingData } = await supabase
+        .from('bookings')
+        .select('*')
+        .eq('token', token)
+        .single();
+
+    if (bookingData) {
+        booking = bookingData;
+        templateId = bookingData.template_id;
+
+        // If already confirmed, simple view (Phase 2 scope: just show message or let them re-view?)
+        // The form handles "confirmed" state, but maybe we should redirect or show a status here?
+        // For now, pass to form, let form handle "Already Booked" if needed.
+    }
+
+    // 2. Fetch template
     const { data: template } = await supabase
         .from('interview_templates')
         .select('*, companies(name)')
@@ -118,6 +136,8 @@ export default async function BookingPage({ params }: PageProps) {
                     slots={validPanelSlots || []}
                     templateId={template.id}
                     briefingText={template.candidate_briefing_text}
+                    existingBooking={booking}
+                    onlineLink={template.online_link}
                 // files={files || []}
                 />
 

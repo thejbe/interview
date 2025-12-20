@@ -92,3 +92,107 @@ export async function sendAvailabilityRequest(
         return { success: false, message: error.message };
     }
 }
+
+export async function createCandidateInvite(
+    templateId: string,
+    name: string,
+    email: string,
+    meetingLink?: string,
+    meetingPlatform?: string
+) {
+    const supabase = await createClient();
+
+    try {
+        // Generate a random token
+        const token = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+
+        const { data, error } = await supabase
+            .from('bookings')
+            .insert({
+                template_id: templateId,
+                candidate_name: name,
+                candidate_email: email,
+                token: token,
+                status: 'pending',
+                slot_id: null, // Explicitly null for invite
+                timezone: 'UTC', // Default, will be updated by candidate
+                meeting_link: meetingLink || null,
+                meeting_platform: meetingPlatform || null
+            })
+            .select()
+            .single();
+
+        if (error) throw error;
+
+        revalidatePath(`/recruiter/templates/${templateId}`);
+        return { success: true, booking: data };
+    } catch (error: any) {
+        console.error('Failed to create invite:', error);
+        return { success: false, message: error.message };
+    }
+}
+
+export async function createManualBooking(
+    bookingId: string,
+    templateId: string,
+    date: string,
+    startTime: string, // "HH:MM"
+    durationMinutes: number,
+    managerIds: string[],
+    meetingLink?: string,
+    meetingPlatform?: string
+) {
+    const supabase = await createClient();
+
+    try {
+        // 1. Calculate Start/End ISO strings
+        const startDateTime = new Date(`${date}T${startTime}:00Z`); // Treat as UTC for safety/consistency
+        const endDateTime = new Date(startDateTime.getTime() + durationMinutes * 60000);
+
+        // 2. Create Slots for each manager (Override)
+        const newSlots = [];
+        for (const managerId of managerIds) {
+            const { data: slot, error } = await supabase
+                .from('slots')
+                .insert({
+                    template_id: templateId,
+                    hiring_manager_id: managerId,
+                    start_time: startDateTime.toISOString(),
+                    end_time: endDateTime.toISOString(),
+                    status: 'booked', // Directly booked
+                    source: 'override'
+                })
+                .select()
+                .single();
+
+            if (error) throw error;
+            newSlots.push(slot);
+        }
+
+        if (newSlots.length === 0) throw new Error('No slots created');
+
+        // 3. Update Booking
+        const primarySlot = newSlots[0];
+        const additionalSlots = newSlots.slice(1).map(s => s.id);
+
+        const { error: bookingError } = await supabase
+            .from('bookings')
+            .update({
+                slot_id: primarySlot.id,
+                additional_slot_ids: additionalSlots,
+                status: 'confirmed',
+                timezone: 'UTC', // Default for override
+                meeting_link: meetingLink || null,
+                meeting_platform: meetingPlatform || null
+            })
+            .eq('id', bookingId);
+
+        if (bookingError) throw bookingError;
+
+        revalidatePath(`/recruiter/templates/${templateId}`);
+        return { success: true };
+    } catch (error: any) {
+        console.error('Failed to manually book:', error);
+        return { success: false, message: error.message };
+    }
+}

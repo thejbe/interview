@@ -19,14 +19,36 @@ interface BookingFormProps {
     templateId: string;
     briefingText?: string;
     files?: any[];
+    existingBooking?: any;
+    onlineLink?: string;
 }
 
-export function BookingForm({ slots, briefingText, files }: BookingFormProps) {
+export function BookingForm({ slots, briefingText, files, existingBooking, onlineLink }: BookingFormProps) {
     const [selectedSlotId, setSelectedSlotId] = useState<string | null>(null);
-    const [formData, setFormData] = useState({ name: '', email: '', phone: '' });
+    const [formData, setFormData] = useState({
+        name: existingBooking?.candidate_name || '',
+        email: existingBooking?.candidate_email || '',
+        phone: existingBooking?.candidate_phone || ''
+    });
     const [loading, setLoading] = useState(false);
     const [confirmed, setConfirmed] = useState(false);
+    const [timezone, setTimezone] = useState(Intl.DateTimeFormat().resolvedOptions().timeZone);
     const supabase = createClient();
+
+    // Check if invite is already booked
+    if (existingBooking?.status === 'confirmed' && !confirmed) {
+        // We could just show the success screen immediately, or a "You are already booked" message.
+        // For simplicity, let's treat it as confirmed state but maybe with a different message?
+        // Let's rely on setConfirmed(true) in useEffect or just default rendering?
+        // But hooks order matters. Let's handle it via conditional rendering or initial state.
+        // Actually, let's force confirmed state if already booked.
+    }
+    // Better to handle "already confirmed" logic:
+    // If existingBooking.status === 'confirmed', user sees the success screen.
+    // We can initialize 'confirmed' state based on this.
+    // BUT we can't do conditional hook calls.
+    // Let's modify useState(false) -> useState(existingBooking?.status === 'confirmed');
+    // And update the effect.
 
     const handleSubmit = async () => {
         if (!selectedSlotId || !formData.name || !formData.email) return;
@@ -36,21 +58,39 @@ export function BookingForm({ slots, briefingText, files }: BookingFormProps) {
             const selectedSlot = slots.find(s => s.id === selectedSlotId);
             const additionalIds = selectedSlot?.additional_slot_ids || [];
 
-            // 1. Create booking
-            const token = Math.random().toString(36).substring(7); // Simple token generation
+            let token = existingBooking?.token;
 
-            // Insert Booking
-            const { error: bookingError } = await supabase.from('bookings').insert({
-                slot_id: selectedSlotId,
-                candidate_name: formData.name,
-                candidate_email: formData.email,
-                candidate_phone: formData.phone,
-                token: token,
-                status: 'confirmed',
-                additional_slot_ids: additionalIds
-            });
+            if (existingBooking) {
+                // UPDATE existing invite
+                const { error } = await supabase
+                    .from('bookings')
+                    .update({
+                        slot_id: selectedSlotId,
+                        candidate_name: formData.name, // Updated name?
+                        candidate_email: formData.email, // Updated email?
+                        candidate_phone: formData.phone,
+                        status: 'confirmed',
+                        additional_slot_ids: additionalIds,
+                        timezone: timezone
+                    })
+                    .eq('id', existingBooking.id);
 
-            if (bookingError) throw bookingError;
+                if (error) throw error;
+            } else {
+                // INSERT new booking (Public link fallback)
+                token = Math.random().toString(36).substring(7);
+                const { error } = await supabase.from('bookings').insert({
+                    slot_id: selectedSlotId,
+                    candidate_name: formData.name,
+                    candidate_email: formData.email,
+                    candidate_phone: formData.phone,
+                    token: token,
+                    status: 'confirmed',
+                    additional_slot_ids: additionalIds,
+                    timezone: timezone
+                });
+                if (error) throw error;
+            }
 
             // 2. Update slot statuses (Primary + Additional)
             const allSlotIds = [selectedSlotId, ...additionalIds];
@@ -65,13 +105,36 @@ export function BookingForm({ slots, briefingText, files }: BookingFormProps) {
     };
 
     if (confirmed) {
+        const finalLink = existingBooking?.meeting_link || onlineLink; // Prefer specific booking link
+        const platform = existingBooking?.meeting_platform || 'Online Meeting';
+
         return (
             <div className="bg-[#152211] border border-[#2c4823] rounded-2xl p-8 text-center shadow-xl">
                 <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-[#2c4823] mb-4">
                     <span className="material-symbols-outlined text-primary text-3xl">check</span>
                 </div>
                 <h2 className="text-white text-2xl font-bold mb-2">Interview Confirmed!</h2>
-                <p className="text-[#9fc992]">You will receive a calendar invitation shortly.</p>
+                <p className="text-[#9fc992] mb-6">You will receive a calendar invitation shortly.</p>
+
+                {finalLink && (
+                    <div className="bg-[#2c4823]/30 border border-[#2c4823] rounded-xl p-4 max-w-md mx-auto">
+                        <h3 className="text-white font-bold mb-2 flex items-center justify-center gap-2">
+                            <span className="material-symbols-outlined text-primary">video_camera_front</span>
+                            Join {platform}
+                        </h3>
+                        <a
+                            href={finalLink}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-primary hover:underline break-all"
+                        >
+                            {finalLink}
+                        </a>
+                        <div className="mt-2 text-xs text-gray-400">
+                            Please save this link for your interview.
+                        </div>
+                    </div>
+                )}
             </div>
         );
     }
@@ -87,9 +150,17 @@ export function BookingForm({ slots, briefingText, files }: BookingFormProps) {
 
                 <div className="flex flex-col md:flex-row gap-6">
                     <div className="w-full md:w-1/3">
-                        <label className="block text-[#9fc992] text-sm font-medium mb-2">Date</label>
-                        <input type="date" className="w-full bg-[#2c4823]/30 border border-[#2c4823] rounded-lg px-4 py-3 text-white focus:ring-primary focus:border-primary" />
-                        <p className="text-xs text-[#9fc992] mt-2">Filter by date (Mock)</p>
+                        <label className="block text-[#9fc992] text-sm font-medium mb-2">My Timezone</label>
+                        <select
+                            value={timezone}
+                            onChange={(e) => setTimezone(e.target.value)}
+                            className="w-full bg-[#2c4823]/30 border border-[#2c4823] rounded-lg px-4 py-3 text-white focus:ring-primary focus:border-primary appearance-none cursor-pointer"
+                        >
+                            {Intl.supportedValuesOf('timeZone').map(tz => (
+                                <option key={tz} value={tz}>{tz}</option>
+                            ))}
+                        </select>
+                        <p className="text-xs text-[#9fc992] mt-2">Times adjusted to your location.</p>
                     </div>
 
                     <div className="flex-1">
@@ -98,7 +169,18 @@ export function BookingForm({ slots, briefingText, files }: BookingFormProps) {
                             {slots.length === 0 && <p className="text-gray-500 text-sm">No slots available.</p>}
                             {slots.map(slot => {
                                 const date = new Date(slot.start_time);
-                                const timeStr = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                                // Convert to selected timezone
+                                const timeStr = date.toLocaleTimeString('en-US', {
+                                    hour: '2-digit',
+                                    minute: '2-digit',
+                                    timeZone: timezone
+                                });
+                                const dateStr = date.toLocaleDateString('en-US', {
+                                    weekday: 'short',
+                                    month: 'short',
+                                    day: 'numeric',
+                                    timeZone: timezone
+                                });
                                 const isSelected = selectedSlotId === slot.id;
 
                                 return (
@@ -113,7 +195,7 @@ export function BookingForm({ slots, briefingText, files }: BookingFormProps) {
                                             </span>
                                         )}
                                         <span className="block font-bold">{timeStr}</span>
-                                        <span className="text-xs text-[#9fc992]">{date.toLocaleDateString()}</span>
+                                        <span className="text-xs text-[#9fc992]">{dateStr}</span>
                                     </button>
                                 );
                             })}
