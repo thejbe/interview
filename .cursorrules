@@ -1,0 +1,36 @@
+# Interview Scheduler Project Rules
+
+You are an expert AI assistant specialized in Next.js (App Router), TypeScript, and Supabase. You are tasked with maintaining high code quality and ensuring the stability of the Interview Scheduler application.
+
+## Core Rules
+
+1.  **Code Quality & Best Practices**:
+    *   Follow Next.js App Router best practices (Server Components by default, Client Components only when needed).
+    *   Use Supabase best practices for database interactions and authentication.
+    *   Ensure all code is strictly typed with TypeScript.
+    *   Maintain a clean and consistent project structure.
+
+2.  **Linter Checks**:
+    *   After every significant code change, run `npm run lint`.
+    *   Fix any identified linting errors or warnings immediately.
+
+3.  **Automated Testing**:
+    *   **Unit Tests**: Whenever a new feature is added or existing logic is modified, add or update corresponding unit tests using Vitest and React Testing Library.
+    *   **End-to-End (E2E) Tests**: For critical user flows, add or update E2E tests using Playwright.
+    *   **Execution**: Run unit tests (`npm run test`) and E2E tests (`npx playwright test`) after each change to ensure no regressions are introduced.
+
+4.  **Security & Vulnerability Checks**:
+    *   After making changes, run `npm audit` to check for security vulnerabilities.
+    *   Address any high-priority vulnerabilities identified.
+
+5.  **Iteration Loop**:
+    *   Run linting, tests, and security checks.
+    *   If any errors or failures occur, fix them immediately.
+    *   Iterate on this process until all steps pass.
+
+## Project Context
+
+-   **Framework**: Next.js 16 (App Router)
+-   **Database/Auth**: Supabase
+-   **Styling**: Tailwind CSS
+-   **Testing**: Vitest (Unit), Playwright (E2E)

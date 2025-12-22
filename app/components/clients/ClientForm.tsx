@@ -38,6 +38,7 @@ export function ClientForm({ initialData, initialDepartments = [], initialManage
     const [loading, setLoading] = useState(false);
 
     // Company State
+    const [clientData, setClientData] = useState<any>(initialData || {});
     const [name, setName] = useState(initialData?.name || '');
     const [active, setActive] = useState(initialData?.active ?? true);
 
@@ -87,11 +88,11 @@ export function ClientForm({ initialData, initialDepartments = [], initialManage
 
     // Manager Handlers
     const handleSaveManager = async () => {
-        if (!mgrFormName || !mgrFormEmail || !initialData?.id) return;
+        if (!mgrFormName || !mgrFormEmail || !clientData?.id) return;
 
         try {
             const managerData = {
-                company_id: initialData?.id,
+                company_id: clientData.id,
                 name: mgrFormName,
                 email: mgrFormEmail,
                 role: mgrFormRole,
@@ -137,17 +138,42 @@ export function ClientForm({ initialData, initialDepartments = [], initialManage
         setLoading(true);
 
         try {
-            let companyId = initialData?.id;
+            let companyId = clientData?.id;
+            let currentClientData = clientData;
 
             // 1. Save Company
-            if (mode === 'create') {
+            if (!companyId) {
+                // Create
                 const { data, error } = await supabase.from('companies').insert({
                     name,
                     active
                 }).select().single();
                 if (error) throw error;
                 companyId = data.id;
+                currentClientData = data;
+                setClientData(data); // Switch to edit mode locally
+
+                // 2. Create Default Department automatically
+                const { data: deptData, error: deptError } = await supabase.from('departments').insert({
+                    company_id: companyId,
+                    name: 'Default'
+                }).select().single();
+
+                if (deptError) {
+                    console.error("Error creating default department:", deptError);
+                } else {
+                    setDepartments([deptData]);
+
+                    // 3. Prepare UI for adding contact
+                    startAddManager();
+                    setMgrFormDeptId(deptData.id); // Pre-select Default department
+
+                    // Update URL without reload
+                    window.history.replaceState(null, '', `/recruiter/clients/${companyId}`);
+                }
+
             } else {
+                // Update
                 const { error } = await supabase.from('companies').update({
                     name,
                     active
@@ -157,8 +183,9 @@ export function ClientForm({ initialData, initialDepartments = [], initialManage
 
             if (!companyId) throw new Error("Failed to get company ID");
 
-            router.push('/recruiter/clients');
-            router.refresh();
+            // No redirect - stay on page
+            // router.push('/recruiter/clients');
+            // router.refresh(); 
         } catch (err: any) {
             console.error(err);
             alert('Error saving client: ' + err.message);
@@ -169,11 +196,11 @@ export function ClientForm({ initialData, initialDepartments = [], initialManage
 
     // Department Handlers
     const handleAddDepartment = async () => {
-        if (!newDeptName || !initialData?.id) return; // Can only add depts if company exists (simplification: save company first?)
+        if (!newDeptName || !clientData?.id) return;
 
         try {
             const { data, error } = await supabase.from('departments').insert({
-                company_id: initialData?.id,
+                company_id: clientData.id,
                 name: newDeptName
             }).select().single();
 
@@ -198,7 +225,7 @@ export function ClientForm({ initialData, initialDepartments = [], initialManage
         }
     };
 
-    const isCreateMode = mode === 'create';
+    const isCreateMode = !clientData?.id;
 
     return (
         <form onSubmit={handleSubmit} className="flex flex-col lg:flex-row gap-8">
@@ -299,7 +326,7 @@ export function ClientForm({ initialData, initialDepartments = [], initialManage
                                 <div className="bg-[#2c4823]/20 p-4 rounded-lg border border-[#2c4823]">
                                     <h4 className="text-white text-sm font-bold mb-3">{editingManagerId ? 'Edit Contact' : 'New Contact'}</h4>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
-                                        <Input label="Name" value={mgrFormName} onChange={e => setMgrFormName(e.target.value)} />
+                                        <Input label="Name" value={mgrFormName} onChange={e => setMgrFormName(e.target.value)} autoFocus />
                                         <Input label="Email" value={mgrFormEmail} onChange={e => setMgrFormEmail(e.target.value)} />
                                         <Input label="Role" value={mgrFormRole} onChange={e => setMgrFormRole(e.target.value)} />
                                         <div>
