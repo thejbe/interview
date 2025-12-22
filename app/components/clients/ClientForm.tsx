@@ -46,6 +46,8 @@ export function ClientForm({ initialData, initialDepartments = [], initialManage
     const [departments, setDepartments] = useState<Department[]>(initialDepartments);
     const [newDeptName, setNewDeptName] = useState('');
     const [addingDept, setAddingDept] = useState(false);
+    const [editingDeptId, setEditingDeptId] = useState<string | null>(null);
+    const [editingDeptName, setEditingDeptName] = useState('');
 
     // Managers State
     const [managers, setManagers] = useState<HiringManager[]>(initialManagers);
@@ -225,6 +227,33 @@ export function ClientForm({ initialData, initialDepartments = [], initialManage
         }
     };
 
+    const startEditDepartment = (dept: Department) => {
+        setEditingDeptId(dept.id);
+        setEditingDeptName(dept.name);
+    };
+
+    const cancelEditDepartment = () => {
+        setEditingDeptId(null);
+        setEditingDeptName('');
+    };
+
+    const handleUpdateDepartment = async (id: string) => {
+        if (!editingDeptName.trim()) return;
+
+        try {
+            const { error } = await supabase.from('departments')
+                .update({ name: editingDeptName })
+                .eq('id', id);
+
+            if (error) throw error;
+
+            setDepartments(departments.map(d => d.id === id ? { ...d, name: editingDeptName } : d));
+            cancelEditDepartment();
+        } catch (err: any) {
+            alert('Error updating department: ' + err.message);
+        }
+    };
+
     const isCreateMode = !clientData?.id;
 
     return (
@@ -260,10 +289,30 @@ export function ClientForm({ initialData, initialDepartments = [], initialManage
                         <div className="space-y-3">
                             {departments.map(dept => (
                                 <div key={dept.id} className="flex items-center justify-between bg-[#2c4823]/20 p-3 rounded-lg border border-[#2c4823]">
-                                    <span className="text-white font-medium">{dept.name}</span>
-                                    <button type="button" onClick={() => handleDeleteDepartment(dept.id)} className="text-red-400 hover:text-red-300 text-sm">
-                                        Delete
-                                    </button>
+                                    {editingDeptId === dept.id ? (
+                                        <div className="flex items-center gap-2 w-full">
+                                            <Input
+                                                value={editingDeptName}
+                                                onChange={e => setEditingDeptName(e.target.value)}
+                                                className="mb-0 py-2 h-9"
+                                                autoFocus
+                                            />
+                                            <Button type="button" className="h-9 text-sm px-3" onClick={() => handleUpdateDepartment(dept.id)}>Save</Button>
+                                            <button type="button" onClick={cancelEditDepartment} className="text-white/60 text-sm">Cancel</button>
+                                        </div>
+                                    ) : (
+                                        <>
+                                            <span className="text-white font-medium">{dept.name}</span>
+                                            <div className="flex items-center gap-3">
+                                                <button type="button" onClick={() => startEditDepartment(dept)} className="text-primary hover:text-white text-sm">
+                                                    Edit
+                                                </button>
+                                                <button type="button" onClick={() => handleDeleteDepartment(dept.id)} className="text-red-400 hover:text-red-300 text-sm">
+                                                    Delete
+                                                </button>
+                                            </div>
+                                        </>
+                                    )}
                                 </div>
                             ))}
 

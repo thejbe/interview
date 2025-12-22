@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
@@ -14,21 +14,30 @@ interface Company {
     name: string;
 }
 
+interface Department {
+    id: string;
+    name: string;
+    company_id: string;
+}
+
 interface HiringManager {
     id: string;
     name: string;
     email: string;
     role?: string;
+    department_id?: string;
+    company_id?: string;
 }
 
 interface TemplateFormProps {
     initialData?: any;
     companies: Company[];
     managers: HiringManager[];
+    departments: Department[];
     mode: 'create' | 'edit';
 }
 
-export function TemplateForm({ initialData, companies, managers, mode }: TemplateFormProps) {
+export function TemplateForm({ initialData, companies, managers, departments, mode }: TemplateFormProps) {
     const router = useRouter();
     const supabase = createClient();
     const [loading, setLoading] = useState(false);
@@ -42,6 +51,23 @@ export function TemplateForm({ initialData, companies, managers, mode }: Templat
     // State
     const [name, setName] = useState(initialData?.name || '');
     const [companyId, setCompanyId] = useState(initialData?.company_id || (companies[0]?.id || ''));
+    const [selectedDepartmentId, setSelectedDepartmentId] = useState<string>('');
+
+    // Update available departments based on company
+    const availableDepartments = departments.filter(d => d.company_id === companyId);
+
+    // Auto-select "Default" department when company changes
+    useEffect(() => {
+        if (companyId) {
+            const defaultDept = availableDepartments.find(d => d.name === 'Default') || availableDepartments[0];
+            if (defaultDept) {
+                setSelectedDepartmentId(defaultDept.id);
+            } else {
+                setSelectedDepartmentId('');
+            }
+        }
+    }, [companyId, departments]);
+
     const [length, setLength] = useState(initialData?.interview_length_minutes || 60);
     const [locationType, setLocationType] = useState<'online' | 'in_person'>(initialData?.location_type || 'online');
     const [onlineLink, setOnlineLink] = useState(initialData?.online_link || '');
@@ -64,6 +90,18 @@ export function TemplateForm({ initialData, companies, managers, mode }: Templat
 
     // Manager Creation State
     const [allManagers, setAllManagers] = useState(managers);
+
+    // Filter managers for "Add Interviewer" list
+    const availableManagers = allManagers.filter(m => {
+        // Filter by company
+        if (m.company_id && m.company_id !== companyId) return false;
+        // Filter by department if selected
+        if (selectedDepartmentId && m.department_id && m.department_id !== selectedDepartmentId) return false;
+
+        // Also exclude already selected managers
+        return !selectedManagers.find(sm => sm.id === m.id);
+    });
+
     const [isAddingManager, setIsAddingManager] = useState(false);
     const [newMgrName, setNewMgrName] = useState('');
     const [newMgrEmail, setNewMgrEmail] = useState('');
@@ -166,7 +204,8 @@ export function TemplateForm({ initialData, companies, managers, mode }: Templat
                 name: newMgrName,
                 email: newMgrEmail,
                 role: newMgrRole,
-                company_id: companyId
+                company_id: companyId,
+                department_id: selectedDepartmentId || null // Include department
             }).select().single();
 
             if (error) throw error;
@@ -314,9 +353,14 @@ export function TemplateForm({ initialData, companies, managers, mode }: Templat
             )}
 
             <div className="flex justify-between items-center mb-8">
-                <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-                    {initialData ? 'Edit Template' : 'Create New Template'}
-                </h1>
+                <div className="flex items-center gap-4">
+                    <Link href="/recruiter/templates" className="text-white/60 hover:text-white">
+                        <span className="material-symbols-outlined">arrow_back</span>
+                    </Link>
+                    <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+                        {mode === 'create' ? 'Create New Template' : 'Edit Template'}
+                    </h1>
+                </div>
                 <div className="flex gap-3">
                     {initialData?.id && (
                         <>
@@ -376,6 +420,22 @@ export function TemplateForm({ initialData, companies, managers, mode }: Templat
                                     {companies.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                                 </select>
                             </div>
+
+                            {/* Department Selector */}
+                            <div>
+                                <label className="block text-[#9fc992] text-sm font-medium mb-2">Department</label>
+                                <select
+                                    title="Department"
+                                    className="w-full bg-[#2c4823]/30 border border-[#2c4823] rounded-lg px-4 py-3 text-white focus:ring-primary focus:border-primary disabled:opacity-50"
+                                    value={selectedDepartmentId}
+                                    onChange={e => setSelectedDepartmentId(e.target.value)}
+                                    disabled={!companyId || availableDepartments.length === 0}
+                                >
+                                    <option value="">All Departments</option>
+                                    {availableDepartments.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
+                                </select>
+                            </div>
+
                             <Input
                                 label="Interview Length (minutes)"
                                 type="number"
@@ -471,7 +531,7 @@ export function TemplateForm({ initialData, companies, managers, mode }: Templat
                         <div className="border-t border-[#2c4823] pt-4">
                             <div className="text-sm text-[#9fc992] mb-2">Add Interviewer:</div>
                             <div className="flex flex-wrap gap-2 mb-4">
-                                {allManagers.filter(m => !selectedManagers.find(sm => sm.id === m.id)).map(m => (
+                                {availableManagers.map(m => (
                                     <button key={m.id} type="button" onClick={() => addManager(m.id)}
                                         className="px-3 py-1 rounded-full border border-[#2c4823] text-white text-sm hover:bg-[#2c4823] transition-colors">
                                         + {m.name}

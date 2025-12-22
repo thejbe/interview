@@ -17,6 +17,14 @@ export function SidebarRecruiter() {
             </div>
             <div className="flex flex-col gap-4 mb-auto">
                 <h2 className="text-gray-400 text-sm font-semibold uppercase px-3">Recruiter</h2>
+                <div className="px-3 py-2">
+                    <label className="relative flex items-center">
+                        <span className="material-symbols-outlined absolute left-3 text-white/40 text-lg">search</span>
+                        <input
+                            className="w-full h-9 pl-10 pr-4 text-sm rounded-full bg-white/5 placeholder:text-white/40 text-white border border-[#2c4823] focus:ring-primary focus:border-primary"
+                            placeholder="Search..." type="search" />
+                    </label>
+                </div>
                 <nav className="flex flex-col gap-2">
                     {/* Dashboard */}
                     <Link

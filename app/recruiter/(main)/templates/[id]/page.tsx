@@ -12,21 +12,37 @@ export default async function TemplateEditorPage({ params }: PageProps) {
     const isNew = id === 'new';
     const supabase = await createClient();
 
-    // Fetch Companies and Managers for dropdowns
-    const { data: companies } = await supabase.from('companies').select('*');
-    const { data: managers } = await supabase.from('hiring_managers').select('*');
-
-    let template = null;
-    let candidates: any[] = [];
-
-    if (!isNew) {
+    // Function to fetch template data
+    const fetchTemplate = async () => {
+        if (isNew) {
+            return null;
+        }
         const { data } = await supabase
             .from('interview_templates')
             .select('*, template_hiring_managers(hiring_manager_id)')
             .eq('id', id)
             .single();
-        template = data;
+        return data;
+    };
 
+    // Parallelize fetches
+    const [
+        { data: companies },
+        { data: managers },
+        { data: departments }, // Fetch departments
+        templateData
+    ] = await Promise.all([
+        supabase.from('companies').select('id, name').order('name'),
+        supabase.from('hiring_managers').select('id, name, email, role, company_id, department_id').eq('active', true).order('name'),
+        supabase.from('departments').select('id, name, company_id').order('name'), // Fetch query
+        fetchTemplate()
+    ]);
+
+    // Serialize for client component
+    const safeTemplate = templateData ? JSON.parse(JSON.stringify(templateData)) : null;
+
+    let candidates: any[] = [];
+    if (!isNew) {
         // Fetch Candidates
         const { data: bookings } = await supabase
             .from('bookings')
@@ -38,20 +54,13 @@ export default async function TemplateEditorPage({ params }: PageProps) {
 
     return (
         <div className="pb-24">
-            <header className="flex items-center gap-4 mb-8">
-                <Link href="/recruiter/templates" className="text-white/60 hover:text-white">
-                    <span className="material-symbols-outlined">arrow_back</span>
-                </Link>
-                <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-                    {isNew ? 'Create New Template' : 'Edit Template'}
-                </h1>
-            </header>
 
             <TemplateForm
                 mode={isNew ? 'create' : 'edit'}
-                initialData={template}
                 companies={companies || []}
                 managers={managers || []}
+                departments={departments || []} // Pass departments
+                initialData={safeTemplate}
             />
 
             {!isNew && (
@@ -59,7 +68,7 @@ export default async function TemplateEditorPage({ params }: PageProps) {
                     templateId={id}
                     candidates={candidates}
                     managers={managers || []}
-                    durationPromise={template?.interview_length_minutes || 60}
+                    durationPromise={safeTemplate?.interview_length_minutes || 60}
                 />
             )}
         </div>

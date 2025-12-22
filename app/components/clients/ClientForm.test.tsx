@@ -150,4 +150,41 @@ describe('ClientForm', () => {
             expect(screen.getByText('Engineering')).toBeInTheDocument();
         });
     });
+
+    it('edits an existing department', async () => {
+        const initialData = { id: '123', name: 'Test Corp', active: true };
+        const initialDepartments = [{ id: 'd1', name: 'Sales', company_id: '123' }];
+
+        const deptChain = {
+            update: vi.fn().mockReturnThis(),
+            eq: vi.fn().mockReturnThis(),
+            select: vi.fn().mockReturnThis(), // Needed if component refreshes list, though current impl updates locally
+        };
+        deptChain.update.mockReturnValue(deptChain as any);
+        deptChain.eq.mockReturnValue(deptChain as any);
+
+        (mockSupabase.from as any).mockImplementation((table: any) => {
+            if (table === 'departments') return deptChain;
+            return {};
+        });
+
+        render(<ClientForm mode="edit" initialData={initialData} initialDepartments={initialDepartments} />);
+
+        // Click Edit
+        fireEvent.click(screen.getByText('Edit'));
+
+        // Change value
+        const input = screen.getByDisplayValue('Sales');
+        fireEvent.change(input, { target: { value: 'Global Sales' } });
+
+        // Save
+        fireEvent.click(screen.getByText('Save'));
+
+        await waitFor(() => {
+            expect(mockSupabase.from).toHaveBeenCalledWith('departments');
+            expect(deptChain.update).toHaveBeenCalledWith({ name: 'Global Sales' });
+            expect(deptChain.eq).toHaveBeenCalledWith('id', 'd1');
+            expect(screen.getByText('Global Sales')).toBeInTheDocument();
+        });
+    });
 });
