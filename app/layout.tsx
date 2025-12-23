@@ -24,6 +24,7 @@ export default function RootLayout({
       </head>
       <body
         className={`${manrope.variable} antialiased bg-background-light dark:bg-background-dark min-h-screen font-display`}
+        suppressHydrationWarning
       >
         {children}
       </body>

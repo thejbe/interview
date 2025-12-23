@@ -1,6 +1,7 @@
+import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
 import { notFound } from 'next/navigation';
-import { ClientHeader } from '@/app/components/clients/ClientHeader';
+import { Header } from '@/app/components/layout/Header';
 import { TemplateList } from '@/app/components/clients/TemplateList';
 import { TemplateDetail } from '@/app/components/clients/TemplateDetail';
 import { RecentClientTracker } from '@/app/components/clients/RecentClientTracker';
@@ -53,46 +54,68 @@ export default async function ClientDashboardPage({ params, searchParams }: Page
         selectedTemplateBookings = bData || [];
     }
 
+    const Title = (
+        <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center border border-primary/30">
+                <span className="material-symbols-outlined text-primary text-sm">business</span>
+            </div>
+            <h1 className="text-lg font-bold text-black dark:text-white">{client.name}</h1>
+            <span className={`px-2 py-0.5 rounded-full text-[10px] font-medium border ${client.active ? 'bg-green-900/30 text-green-400 border-green-800' : 'bg-red-900/30 text-red-400 border-red-800'}`}>
+                {client.active ? 'Active' : 'Archived'}
+            </span>
+        </div>
+    );
+
+    const Actions = (
+        <Link
+            href={`/recruiter/clients/${client.id}`}
+            className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-[#2c4823] bg-[#152211] text-[#9fc992] hover:text-white hover:border-primary/50 transition-all font-medium text-xs"
+        >
+            <span className="material-symbols-outlined text-sm">settings</span>
+            Settings
+        </Link>
+    );
+
 
     return (
-        <div className="max-w-7xl mx-auto pb-20 h-[calc(100vh-100px)] flex flex-col">
+        <div className="flex flex-col h-screen">
             <RecentClientTracker clientId={id} />
-            {/* Header */}
-            <div className="flex-shrink-0 mb-6">
-                <ClientHeader client={client} />
-            </div>
 
-            {/* Master-Detail Layout */}
-            <div className="flex-1 grid grid-cols-1 lg:grid-cols-4 gap-6 min-h-0">
+            <Header title={Title} actions={Actions} />
 
-                {/* Left Column: Template List (Master) */}
-                <div className="lg:col-span-1 h-full min-h-0">
-                    <TemplateList
-                        templates={templates || []}
-                        company={client}
-                        managers={managers || []}
-                        departments={departments || []}
-                    />
-                </div>
+            <main className="flex-1 p-8 overflow-hidden h-full flex flex-col min-h-0">
+                {/* Master-Detail Layout */}
+                <div className="flex-1 grid grid-cols-1 lg:grid-cols-4 gap-6 min-h-0">
 
-                {/* Right Column: Detail Widgets */}
-                <div className="lg:col-span-3 h-full min-h-0 overflow-hidden flex flex-col">
-                    {activeId ? (
-                        <TemplateDetail
-                            templateId={activeId}
-                            bookings={selectedTemplateBookings}
+                    {/* Left Column: Template List (Master) */}
+                    <div className="lg:col-span-1 h-full min-h-0">
+                        <TemplateList
+                            templates={templates || []}
+                            company={client}
+                            managers={managers || []}
+                            departments={departments || []}
                         />
-                    ) : (
-                        <div className="h-full flex flex-col items-center justify-center bg-[#152211]/50 border border-[#2c4823] dashed rounded-2xl text-center p-8">
-                            <span className="material-symbols-outlined text-6xl text-[#2c4823] mb-4">ads_click</span>
-                            <h3 className="text-xl font-bold text-white mb-2">Select a Vacancy</h3>
-                            <p className="text-[#9fc992] max-w-md">
-                                Choose a template from the list on the left to manage candidates, interviews, and view activity.
-                            </p>
-                        </div>
-                    )}
+                    </div>
+
+                    {/* Right Column: Detail Widgets */}
+                    <div className="lg:col-span-3 h-full min-h-0 overflow-hidden flex flex-col">
+                        {activeId ? (
+                            <TemplateDetail
+                                templateId={activeId}
+                                bookings={selectedTemplateBookings}
+                            />
+                        ) : (
+                            <div className="h-full flex flex-col items-center justify-center bg-[#152211]/50 border border-[#2c4823] dashed rounded-2xl text-center p-8">
+                                <span className="material-symbols-outlined text-6xl text-[#2c4823] mb-4">ads_click</span>
+                                <h3 className="text-xl font-bold text-white mb-2">Select a Vacancy</h3>
+                                <p className="text-[#9fc992] max-w-md">
+                                    Choose a template from the list on the left to manage candidates, interviews, and view activity.
+                                </p>
+                            </div>
+                        )}
+                    </div>
                 </div>
-            </div>
+            </main>
         </div>
     );
 }

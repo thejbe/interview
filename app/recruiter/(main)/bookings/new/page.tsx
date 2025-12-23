@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { BookingEntryForm } from '@/app/components/booking/BookingEntryForm';
 import Link from 'next/link';
+import { Header } from '@/app/components/layout/Header';
 
 export default async function NewBookingPage() {
     const supabase = await createClient();
@@ -13,15 +14,21 @@ export default async function NewBookingPage() {
         .order('created_at', { ascending: false });
 
     return (
-        <div className="pb-24">
-            <div className="flex items-center gap-4 mb-8">
-                <Link href="/recruiter/bookings" className="w-10 h-10 flex items-center justify-center rounded-full bg-[#152211] border border-[#2c4823] text-white hover:bg-[#2c4823] transition-colors">
-                    <span className="material-symbols-outlined">arrow_back</span>
-                </Link>
-                <h1 className="text-3xl font-bold text-gray-900 dark:text-white">New Booking</h1>
-            </div>
+        <div className="flex flex-col h-screen">
+            <Header
+                title={
+                    <div className="flex items-center gap-4">
+                        <Link href="/recruiter/bookings" className="w-8 h-8 flex items-center justify-center rounded-full bg-[#152211] border border-[#2c4823] text-white hover:bg-[#2c4823] transition-colors">
+                            <span className="material-symbols-outlined text-sm">arrow_back</span>
+                        </Link>
+                        <h1 className="text-lg font-bold text-black dark:text-white">New Booking</h1>
+                    </div>
+                }
+            />
 
-            <BookingEntryForm templates={templates || []} />
+            <main className="flex-1 p-8 overflow-y-auto">
+                <BookingEntryForm templates={templates || []} />
+            </main>
         </div>
     );
 }
