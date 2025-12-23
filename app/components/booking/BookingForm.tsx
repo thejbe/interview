@@ -22,13 +22,12 @@ interface BookingFormProps {
     slots: Slot[];
     templateId: string;
     briefingText?: string;
-    files?: { file_url: string; file_name: string }[];
     existingBooking?: { candidate_name: string; candidate_email: string; candidate_phone: string };
     onlineLink?: string;
     managers?: Record<string, { name: string; role?: string }>;
 }
 
-export function BookingForm({ slots, templateId, briefingText, files, existingBooking, onlineLink, managers }: BookingFormProps) {
+export function BookingForm({ slots, templateId, briefingText, existingBooking, onlineLink, managers }: BookingFormProps) {
     const [selectedSlotId, setSelectedSlotId] = useState<string | null>(null);
     const [formData, setFormData] = useState({
         name: existingBooking?.candidate_name || '',
@@ -372,16 +371,6 @@ export function BookingForm({ slots, templateId, briefingText, files, existingBo
                 <div className="bg-[#2c4823]/10 border-t border-[#2c4823] p-6">
                     <h4 className="text-[#9fc992] text-xs font-bold uppercase mb-2">Instructions from Recruiter</h4>
                     <p className="text-white text-sm whitespace-pre-line">{briefingText}</p>
-                    {files && files.length > 0 && (
-                        <div className="flex gap-4 mt-3">
-                            {files.map((f, i) => (
-                                <a key={i} href={f.file_url} target="_blank" className="text-primary text-sm hover:underline flex items-center gap-1">
-                                    <span className="material-symbols-outlined text-sm">attach_file</span>
-                                    {f.file_name}
-                                </a>
-                            ))}
-                        </div>
-                    )}
                 </div>
             )}
         </div>

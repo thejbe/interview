@@ -55,12 +55,11 @@ export default async function BookingPage({ params }: PageProps) {
     // AND status = 'open'
     // AND start_time > now
 
-    // We need a list of all potential manager IDs to fetch slots for
     const allManagerIds = templateManagers?.map(m => m.hiring_manager_id) || [];
 
+
     if (allManagerIds.length === 0) {
-        // No managers, no slots
-        console.log('[Debug] No managers assigned to this template.');
+        // No managers means no slots can be found
     }
 
     const { data: rawSlots } = await supabase
@@ -136,9 +135,6 @@ export default async function BookingPage({ params }: PageProps) {
         });
     });
 
-    // Fetch files (mock query or real relation)
-    // const { data: files } = await supabase.from('template_files').select('*').eq('template_id', template.id);
-
     return (
         <div className="min-h-screen p-4 md:p-8 flex flex-col items-center relative overflow-x-hidden">
             {/* Background */}
@@ -163,7 +159,6 @@ export default async function BookingPage({ params }: PageProps) {
                         acc[curr.hiring_manager_id] = curr.hiring_managers;
                         return acc;
                     }, {} as Record<string, { name: string; role?: string }>)}
-                // files={files || []}
                 />
 
                 <footer className="mt-12 text-center text-[#9fc992]/40 text-sm font-medium">
