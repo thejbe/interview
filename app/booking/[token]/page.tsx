@@ -42,7 +42,7 @@ export default async function BookingPage({ params }: PageProps) {
     // Fetch template managers to get rules
     const { data: templateManagers } = await supabase
         .from('template_hiring_managers')
-        .select('hiring_manager_id, role_type')
+        .select('hiring_manager_id, role_type, hiring_managers(*)')
         .eq('template_id', templateId);
 
     const mandatoryManagers = templateManagers?.filter(m => m.role_type === 'mandatory').map(m => m.hiring_manager_id) || [];
@@ -80,7 +80,15 @@ export default async function BookingPage({ params }: PageProps) {
     });
 
     // Filter for valid panels
-    const validPanelSlots: any[] = [];
+    interface PageSlot {
+        id: string;
+        additional_slot_ids: string[];
+        start_time: string;
+        end_time: string;
+        status: string;
+        hiring_manager_id: string;
+    }
+    const validPanelSlots: PageSlot[] = [];
 
     Object.entries(slotsByTime).forEach(([time, slots]) => {
         // 1. Check Count
@@ -89,12 +97,12 @@ export default async function BookingPage({ params }: PageProps) {
         const managerIds = slots.map(s => s.hiring_manager_id);
 
         // 2. Check Mandatory
-        const distinctMandatory = mandatoryManagers.filter((id: any) => managerIds.includes(id));
+        const distinctMandatory = mandatoryManagers.filter((id) => managerIds.includes(id));
         if (distinctMandatory.length !== mandatoryManagers.length) return; // Missing some mandatory
 
         // 3. Check At Least One (if any are defined)
         if (atLeastOneManagers.length > 0) {
-            const hasAtLeastOne = atLeastOneManagers.some((id: any) => managerIds.includes(id));
+            const hasAtLeastOne = atLeastOneManagers.some((id) => managerIds.includes(id));
             if (!hasAtLeastOne) return;
         }
 
@@ -123,7 +131,8 @@ export default async function BookingPage({ params }: PageProps) {
             additional_slot_ids: selectedSlots.slice(1).map(s => s.id), // Others
             start_time: time,
             end_time: selectedSlots[0].end_time,
-            status: 'open'
+            status: 'open',
+            hiring_manager_id: selectedSlots[0].hiring_manager_id
         });
     });
 
@@ -150,6 +159,10 @@ export default async function BookingPage({ params }: PageProps) {
                     briefingText={template.candidate_briefing_text}
                     existingBooking={booking}
                     onlineLink={template.online_link}
+                    managers={(templateManagers as unknown as { hiring_manager_id: string; hiring_managers: { name: string; role?: string } }[])?.reduce((acc, curr) => {
+                        acc[curr.hiring_manager_id] = curr.hiring_managers;
+                        return acc;
+                    }, {} as Record<string, { name: string; role?: string }>)}
                 // files={files || []}
                 />
 

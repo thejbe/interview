@@ -59,13 +59,13 @@ export async function sendAvailabilityRequest(
             const link = `http://localhost:3000/manager/availability?template_id=${templateId}`;
 
             // Replace variables
-            let body = bodyTemplate!
+            const body = bodyTemplate!
                 .replace('{{manager_name}}', manager.name)
                 .replace('{{recruiter_name}}', `${template.recruiters?.first_name} ${template.recruiters?.last_name}`)
                 .replace('{{template_name}}', template.name)
                 .replace('{{link}}', link);
 
-            let subject = subjectTemplate!.replace('{{template_name}}', template.name);
+            const subject = subjectTemplate!.replace('{{template_name}}', template.name);
 
             // Simulate Send
             console.log('--- MOCK EMAIL SEND ---');

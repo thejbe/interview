@@ -1,13 +1,12 @@
 "use client";
 
 import { useState, useEffect, useMemo } from 'react';
-import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { Button } from '@/app/components/ui/Button';
 import { Input } from '@/app/components/ui/Input';
 import {
     startOfMonth, endOfMonth, startOfWeek, endOfWeek, eachDayOfInterval,
-    format, addMonths, subMonths, isSameMonth, isSameDay, parseISO
+    format, addMonths, subMonths, isSameMonth, isSameDay
 } from 'date-fns';
 
 interface Slot {
@@ -16,18 +15,20 @@ interface Slot {
     end_time: string;
     status: string;
     additional_slot_ids?: string[];
+    hiring_manager_id?: string;
 }
 
 interface BookingFormProps {
     slots: Slot[];
     templateId: string;
     briefingText?: string;
-    files?: any[];
-    existingBooking?: any;
+    files?: { file_url: string; file_name: string }[];
+    existingBooking?: { candidate_name: string; candidate_email: string; candidate_phone: string };
     onlineLink?: string;
+    managers?: Record<string, { name: string; role?: string }>;
 }
 
-export function BookingForm({ slots, templateId, briefingText, files, existingBooking, onlineLink }: BookingFormProps) {
+export function BookingForm({ slots, templateId, briefingText, files, existingBooking, onlineLink, managers }: BookingFormProps) {
     const [selectedSlotId, setSelectedSlotId] = useState<string | null>(null);
     const [formData, setFormData] = useState({
         name: existingBooking?.candidate_name || '',
@@ -63,7 +64,7 @@ export function BookingForm({ slots, templateId, briefingText, files, existingBo
                 const dateKey = date.toLocaleDateString('en-CA', { timeZone: timezone });
                 if (!groups[dateKey]) groups[dateKey] = [];
                 groups[dateKey].push(slot);
-            } catch (e) {
+            } catch {
                 // Fallback for invalid timezones in older browsers (shouldn't happen with Intl list)
             }
         });
@@ -125,7 +126,7 @@ export function BookingForm({ slots, templateId, briefingText, files, existingBo
         }
 
         // Create booking
-        let inviteToken = crypto.randomUUID();
+        const inviteToken = crypto.randomUUID();
 
         const { error: bookingError } = await supabase.from('bookings').insert({
             slot_id: selectedSlotId,
@@ -163,24 +164,66 @@ export function BookingForm({ slots, templateId, briefingText, files, existingBo
     };
 
     if (confirmed) {
+        const slot = slots.find(s => s.id === selectedSlotId);
+        const date = slot ? new Date(slot.start_time) : new Date();
+        const manager = slot ? managers?.[slot.hiring_manager_id || ''] : null;
+
         return (
-            <div className="bg-[#152211] border border-[#2c4823] rounded-2xl p-8 shadow-xl text-center">
+            <div className="bg-[#152211] border border-[#2c4823] rounded-2xl p-8 shadow-xl text-center animate-in fade-in zoom-in duration-300">
                 <div className="w-16 h-16 bg-green-900 rounded-full flex items-center justify-center mx-auto mb-6">
                     <span className="material-symbols-outlined text-green-400 text-4xl">check_circle</span>
                 </div>
-                <h2 className="text-white text-2xl font-bold mb-4">Initial Interview Confirmed!</h2>
-                <p className="text-[#9fc992] mb-8">
-                    We have sent a confirmation email to <strong>{formData.email}</strong>.
-                </p>
+                <h2 className="text-white text-2xl font-bold mb-6">Interview Confirmed!</h2>
 
-                {onlineLink && (
-                    <div className="bg-[#2c4823]/30 p-4 rounded-lg inline-block mb-6">
-                        <p className="text-xs text-[#9fc992] font-bold uppercase mb-1">Meeting Link</p>
-                        <p className="text-white select-all">{onlineLink}</p>
+                <div className="bg-[#2c4823]/30 rounded-xl p-6 mb-8 text-left space-y-4">
+                    <div className="flex gap-4 items-start">
+                        <div className="w-10 h-10 rounded-full bg-[#152211] border border-[#2c4823] flex items-center justify-center shrink-0">
+                            <span className="material-symbols-outlined text-[#9fc992]">calendar_today</span>
+                        </div>
+                        <div>
+                            <p className="text-[#9fc992] text-xs font-bold uppercase mb-0.5">When</p>
+                            <p className="text-white font-medium">{date.toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' })}</p>
+                            <p className="text-white/80">{date.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })} ({Intl.DateTimeFormat().resolvedOptions().timeZone})</p>
+                        </div>
                     </div>
-                )}
 
-                <Button onClick={() => window.location.reload()}>Book Another</Button>
+                    <div className="flex gap-4 items-start">
+                        <div className="w-10 h-10 rounded-full bg-[#152211] border border-[#2c4823] flex items-center justify-center shrink-0">
+                            <span className="material-symbols-outlined text-[#9fc992]">person</span>
+                        </div>
+                        <div>
+                            <p className="text-[#9fc992] text-xs font-bold uppercase mb-0.5">With</p>
+                            <p className="text-white font-medium">{manager?.name || 'Hiring Team'}</p>
+                            {manager?.role && <p className="text-white/60 text-sm">{manager.role}</p>}
+                        </div>
+                    </div>
+
+                    <div className="flex gap-4 items-start">
+                        <div className="w-10 h-10 rounded-full bg-[#152211] border border-[#2c4823] flex items-center justify-center shrink-0">
+                            <span className="material-symbols-outlined text-[#9fc992]">videocam</span>
+                        </div>
+                        <div>
+                            <p className="text-[#9fc992] text-xs font-bold uppercase mb-0.5">Where</p>
+                            {onlineLink ? (
+                                <p className="text-primary font-medium select-all break-all">{onlineLink}</p>
+                            ) : (
+                                <p className="text-white font-medium">Link will be sent via email</p>
+                            )}
+                        </div>
+                    </div>
+                </div>
+
+                <div className="border-t border-[#2c4823] pt-6">
+                    {briefingText && (
+                        <div className="mb-6 p-4 bg-[#2c4823]/20 rounded-lg text-left">
+                            <p className="text-[#9fc992] text-xs font-bold uppercase mb-2">Note from Recruiter</p>
+                            <p className="text-white text-sm whitespace-pre-line">{briefingText}</p>
+                        </div>
+                    )}
+                    <p className="text-[#9fc992] opacity-80 text-sm">
+                        A calendar invitation has been sent to <strong>{formData.email}</strong>.
+                    </p>
+                </div>
             </div>
         );
     }
