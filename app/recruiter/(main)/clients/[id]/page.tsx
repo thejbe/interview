@@ -45,7 +45,7 @@ export default async function ClientEditorPage({ params }: PageProps) {
     return (
         <div>
             <header className="flex items-center gap-4 mb-8">
-                <Link href="/recruiter/clients" className="text-white/60 hover:text-white">
+                <Link href={isNew ? "/recruiter/clients" : `/recruiter/clients/${id}/dashboard`} className="text-white/60 hover:text-white">
                     <span className="material-symbols-outlined">arrow_back</span>
                 </Link>
                 <h1 className="text-3xl font-bold text-gray-900 dark:text-white">

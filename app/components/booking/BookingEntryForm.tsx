@@ -7,9 +7,10 @@ import { useRouter } from 'next/navigation';
 
 interface BookingEntryFormProps {
     templates: any[]; // Interview templates
+    onSuccess?: () => void;
 }
 
-export function BookingEntryForm({ templates }: BookingEntryFormProps) {
+export function BookingEntryForm({ templates, onSuccess }: BookingEntryFormProps) {
     // Phase 1: Select Template
     const [selectedTemplateId, setSelectedTemplateId] = useState<string>('');
     // Phase 2: Select Action
@@ -87,8 +88,13 @@ export function BookingEntryForm({ templates }: BookingEntryFormProps) {
                 await supabase.from('slots').update({ status: 'booked' }).eq('id', selectedSlotId);
 
                 alert('Interview booked successfully!');
-                router.push('/recruiter/bookings');
-                router.refresh();
+
+                if (onSuccess) {
+                    onSuccess();
+                } else {
+                    router.push('/recruiter/bookings');
+                    router.refresh();
+                }
 
             } else {
                 // Share Invite
@@ -141,8 +147,8 @@ export function BookingEntryForm({ templates }: BookingEntryFormProps) {
                         type="button"
                         onClick={() => handleActionSelect('manual')}
                         className={`p-4 rounded-xl border text-left transition-all ${actionType === 'manual'
-                                ? 'border-primary bg-primary/10'
-                                : 'border-[#2c4823] hover:border-primary/50'
+                            ? 'border-primary bg-primary/10'
+                            : 'border-[#2c4823] hover:border-primary/50'
                             }`}
                     >
                         <span className="material-symbols-outlined text-primary mb-2 text-2xl">event_available</span>
@@ -154,8 +160,8 @@ export function BookingEntryForm({ templates }: BookingEntryFormProps) {
                         type="button"
                         onClick={() => handleActionSelect('share')}
                         className={`p-4 rounded-xl border text-left transition-all ${actionType === 'share'
-                                ? 'border-primary bg-primary/10'
-                                : 'border-[#2c4823] hover:border-primary/50'
+                            ? 'border-primary bg-primary/10'
+                            : 'border-[#2c4823] hover:border-primary/50'
                             }`}
                     >
                         <span className="material-symbols-outlined text-primary mb-2 text-2xl">share</span>
@@ -208,8 +214,8 @@ export function BookingEntryForm({ templates }: BookingEntryFormProps) {
                                                 key={slot.id}
                                                 onClick={() => setSelectedSlotId(slot.id)}
                                                 className={`p-3 rounded-lg border cursor-pointer text-sm ${selectedSlotId === slot.id
-                                                        ? 'border-primary bg-primary/20 text-white chat-bubble'
-                                                        : 'border-[#2c4823] bg-[#2c4823]/30 text-gray-300 hover:bg-[#2c4823]/50'
+                                                    ? 'border-primary bg-primary/20 text-white chat-bubble'
+                                                    : 'border-[#2c4823] bg-[#2c4823]/30 text-gray-300 hover:bg-[#2c4823]/50'
                                                     }`}
                                             >
                                                 <div className="font-bold">
@@ -250,7 +256,6 @@ export function BookingEntryForm({ templates }: BookingEntryFormProps) {
                         />
                         <Button
                             variant="secondary"
-                            size="sm"
                             onClick={() => {
                                 navigator.clipboard.writeText(inviteLink);
                                 alert('Copied!');

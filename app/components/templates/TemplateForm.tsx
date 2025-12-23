@@ -35,9 +35,11 @@ interface TemplateFormProps {
     managers: HiringManager[];
     departments: Department[];
     mode: 'create' | 'edit';
+    onSuccess?: () => void;
+    isModal?: boolean;
 }
 
-export function TemplateForm({ initialData, companies, managers, departments, mode }: TemplateFormProps) {
+export function TemplateForm({ initialData, companies, managers, departments, mode, onSuccess, isModal }: TemplateFormProps) {
     const router = useRouter();
     const supabase = createClient();
     const [loading, setLoading] = useState(false);
@@ -156,8 +158,12 @@ export function TemplateForm({ initialData, companies, managers, departments, mo
             alert(result.message);
             // If post-save flow, redirect now
             if (savedTemplateId) {
-                router.push('/recruiter/templates');
-                router.refresh();
+                if (onSuccess) {
+                    onSuccess();
+                } else {
+                    router.push('/recruiter/templates');
+                    router.refresh();
+                }
             } else {
                 router.refresh();
             }
@@ -168,7 +174,9 @@ export function TemplateForm({ initialData, companies, managers, departments, mo
 
     const handleSkip = () => {
         setShowEmailModal(false);
-        if (savedTemplateId) {
+        if (onSuccess) {
+            onSuccess();
+        } else if (savedTemplateId) {
             router.push('/recruiter/templates');
             router.refresh();
         }
@@ -264,9 +272,13 @@ export function TemplateForm({ initialData, companies, managers, departments, mo
                 const { data, error } = await supabase.from('interview_templates').update(templateData).eq('id', initialData.id).select().single();
                 if (error) throw error;
                 result = data;
-                // Redirect on update
-                router.push('/recruiter/templates');
-                router.refresh();
+                if (onSuccess) {
+                    onSuccess();
+                } else {
+                    // Redirect on update
+                    router.push('/recruiter/templates');
+                    router.refresh();
+                }
             }
 
             // Sync Managers
@@ -352,45 +364,52 @@ export function TemplateForm({ initialData, companies, managers, departments, mo
                 </div>
             )}
 
-            <div className="flex justify-between items-center mb-8">
-                <div className="flex items-center gap-4">
-                    <Link href="/recruiter/templates" className="text-white/60 hover:text-white">
-                        <span className="material-symbols-outlined">arrow_back</span>
-                    </Link>
-                    <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-                        {mode === 'create' ? 'Create New Template' : 'Edit Template'}
-                    </h1>
+            {/* Header - Only if not modal */}
+            {!isModal && (
+                <div className="flex justify-between items-center mb-8">
+                    <div className="flex items-center gap-4">
+                        <Link href="/recruiter/templates" className="text-white/60 hover:text-white">
+                            <span className="material-symbols-outlined">arrow_back</span>
+                        </Link>
+                        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+                            {mode === 'create' ? 'Create New Template' : 'Edit Template'}
+                        </h1>
+                    </div>
+                    <div className="flex gap-3">
+                        {initialData?.id && (
+                            <>
+                                <button
+                                    onClick={() => handleCopyLink()}
+                                    className="flex items-center justify-center w-10 h-10 rounded-full border border-gray-600 text-gray-400 hover:text-white hover:border-white transition-colors"
+                                    title="Copy Manager Invite Link"
+                                    type="button"
+                                >
+                                    <span className="material-symbols-outlined text-lg">link</span>
+                                </button>
+                                <Button
+                                    type="button"
+                                    variant="secondary"
+                                    onClick={() => handleRequestAvailability()}
+                                    disabled={sendingRequests}
+                                    className="bg-[#0078d4] text-white hover:bg-[#0078d4]/90 border-transparent"
+                                >
+                                    <span className="material-symbols-outlined mr-2">edit_note</span>
+                                    Request Availability
+                                </Button>
+                            </>
+                        )}
+                        <Button onClick={handleSubmit} disabled={loading}>
+                            {loading ? 'Saving...' : 'Save Template'}
+                        </Button>
+                    </div>
                 </div>
-                <div className="flex gap-3">
-                    {initialData?.id && (
-                        <>
-                            <button
-                                onClick={() => handleCopyLink()}
-                                className="flex items-center justify-center w-10 h-10 rounded-full border border-gray-600 text-gray-400 hover:text-white hover:border-white transition-colors"
-                                title="Copy Manager Invite Link"
-                                type="button"
-                            >
-                                <span className="material-symbols-outlined text-lg">link</span>
-                            </button>
-                            <Button
-                                type="button"
-                                variant="secondary"
-                                onClick={() => handleRequestAvailability()}
-                                disabled={sendingRequests}
-                                className="bg-[#0078d4] text-white hover:bg-[#0078d4]/90 border-transparent"
-                            >
-                                <span className="material-symbols-outlined mr-2">edit_note</span>
-                                Request Availability
-                            </Button>
-                        </>
-                    )}
-                    <Button onClick={handleSubmit} disabled={loading}>
-                        {loading ? 'Saving...' : 'Save Template'}
-                    </Button>
-                </div>
-            </div>
+            )}
 
-            <form onSubmit={handleSubmit} className="flex flex-col lg:flex-row gap-8">
+            <form
+                id="template-form"
+                onSubmit={handleSubmit}
+                className={`flex gap-8 ${isModal ? 'flex-col' : 'flex-col lg:flex-row'}`}
+            >
                 <div className="flex-1 space-y-8">
                     {/* Helper to pick company/recruiter if empty */}
                     {companies.length === 0 && (
@@ -582,42 +601,46 @@ export function TemplateForm({ initialData, companies, managers, departments, mo
                         </div>
                     </section>
 
-                    {/* Actions */}
-                    <div className="flex items-center gap-4 pt-4">
-                        <Button type="submit" disabled={loading}>
-                            {loading ? 'Saving...' : 'Save Template'}
-                        </Button>
-                        <Link href="/recruiter/templates" className="px-6 py-3 text-white font-bold hover:bg-white/10 rounded-full transition-colors">
-                            Cancel
-                        </Link>
-                    </div>
+                    {/* Actions - Only if not modal */}
+                    {!isModal && (
+                        <div className="flex items-center gap-4 pt-4">
+                            <Button type="submit" disabled={loading}>
+                                {loading ? 'Saving...' : 'Save Template'}
+                            </Button>
+                            <Link href="/recruiter/templates" className="px-6 py-3 text-white font-bold hover:bg-white/10 rounded-full transition-colors">
+                                Cancel
+                            </Link>
+                        </div>
+                    )}
                 </div>
 
-                {/* Sidebar */}
-                <div className="w-full lg:w-80 flex-shrink-0">
-                    <div className="bg-[#152211] border border-[#2c4823] rounded-2xl p-6 sticky top-24">
-                        <h3 className="text-white text-lg font-bold mb-4">Summary</h3>
-                        <p className="text-[#9fc992] text-sm">Fill out the form to see summary.</p>
-                        {/* Persistent Link Display (Visible if template ID known) */}
-                        {currentId && (
-                            <div className="mt-6 pt-4 border-t border-[#2c4823]">
-                                <h4 className="text-white text-xs uppercase font-bold tracking-wider mb-2">Availability Link</h4>
-                                <div className="bg-[#1c2e18] p-2 rounded border border-[#2c4823] flex items-center gap-2">
-                                    <span className="text-xs text-[#9fc992] truncate flex-1 block">
-                                        {getLink(currentId)}
-                                    </span>
-                                    <button
-                                        type="button"
-                                        onClick={() => handleCopyLink(currentId)}
-                                        className="text-white hover:text-primary transition-colors"
-                                    >
-                                        <span className="material-symbols-outlined text-sm">content_copy</span>
-                                    </button>
+                {/* Sidebar - Hide if modal */}
+                {!isModal && (
+                    <div className="w-full lg:w-80 flex-shrink-0">
+                        <div className="bg-[#152211] border border-[#2c4823] rounded-2xl p-6 sticky top-24">
+                            <h3 className="text-white text-lg font-bold mb-4">Summary</h3>
+                            <p className="text-[#9fc992] text-sm">Fill out the form to see summary.</p>
+                            {/* Persistent Link Display (Visible if template ID known) */}
+                            {currentId && (
+                                <div className="mt-6 pt-4 border-t border-[#2c4823]">
+                                    <h4 className="text-white text-xs uppercase font-bold tracking-wider mb-2">Availability Link</h4>
+                                    <div className="bg-[#1c2e18] p-2 rounded border border-[#2c4823] flex items-center gap-2">
+                                        <span className="text-xs text-[#9fc992] truncate flex-1 block">
+                                            {getLink(currentId)}
+                                        </span>
+                                        <button
+                                            type="button"
+                                            onClick={() => handleCopyLink(currentId)}
+                                            className="text-white hover:text-primary transition-colors"
+                                        >
+                                            <span className="material-symbols-outlined text-sm">content_copy</span>
+                                        </button>
+                                    </div>
                                 </div>
-                            </div>
-                        )}
+                            )}
+                        </div>
                     </div>
-                </div>
+                )}
             </form>
         </div>
     );

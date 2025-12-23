@@ -6,12 +6,16 @@ interface AppShellProps {
     children: React.ReactNode;
     role: 'recruiter' | 'manager';
     title?: string;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    recentClients?: any[];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    allClients?: any[];
 }
 
-export function AppShell({ children, role, title = 'Dashboard' }: AppShellProps) {
+export function AppShell({ children, role, title = 'Dashboard', recentClients, allClients }: AppShellProps) {
     return (
         <div className="flex bg-background-light dark:bg-background-dark min-h-screen">
-            {role === 'recruiter' ? <SidebarRecruiter /> : <SidebarManager />}
+            {role === 'recruiter' ? <SidebarRecruiter recentClients={recentClients} allClients={allClients} /> : <SidebarManager />}
 
             <div className="flex flex-1 flex-col transition-all w-full">
                 <Header title={title} />

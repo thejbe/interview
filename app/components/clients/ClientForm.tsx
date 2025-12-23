@@ -185,9 +185,9 @@ export function ClientForm({ initialData, initialDepartments = [], initialManage
 
             if (!companyId) throw new Error("Failed to get company ID");
 
-            // No redirect - stay on page
-            // router.push('/recruiter/clients');
-            // router.refresh(); 
+            // Success - Redirect to Dashboard
+            router.push(`/recruiter/clients/${companyId}/dashboard`);
+            router.refresh();
         } catch (err: any) {
             console.error(err);
             alert('Error saving client: ' + err.message);
