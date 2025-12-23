@@ -19,7 +19,7 @@ export default async function TemplateEditorPage({ params }: PageProps) {
         }
         const { data } = await supabase
             .from('interview_templates')
-            .select('*, template_hiring_managers(hiring_manager_id)')
+            .select('*, template_hiring_managers(hiring_manager_id, role_type, list_order)')
             .eq('id', id)
             .single();
         return data;

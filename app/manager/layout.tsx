@@ -6,7 +6,7 @@ export default function ManagerLayout({
     children: React.ReactNode;
 }) {
     return (
-        <AppShell role="manager" title="Availability">
+        <AppShell role="manager" title="Availability Management">
             {children}
         </AppShell>
     );

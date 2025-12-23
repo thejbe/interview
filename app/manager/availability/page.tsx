@@ -19,7 +19,47 @@ export default async function ManagerAvailabilityPage({ searchParams }: PageProp
     }
 
     // Get Manager Profile
-    const { data: manager } = await supabase.from('hiring_managers').select('*').eq('auth_user_id', user.id).single();
+    let { data: manager } = await supabase.from('hiring_managers').select('*').eq('auth_user_id', user.id).single();
+
+    // Auto-link logic: If not found by ID, try to find by email and link
+    if (!manager && user.email) {
+        const { data: existingManager } = await supabase
+            .from('hiring_managers')
+            .select('*')
+            .eq('email', user.email)
+            .single();
+
+        if (existingManager) {
+            // Found by email! Link the account.
+            const { data: linkedManager, error: linkError } = await supabase
+                .from('hiring_managers')
+                .update({ auth_user_id: user.id })
+                .eq('id', existingManager.id)
+                .select()
+                .single();
+
+            if (!linkError && linkedManager) {
+                manager = linkedManager;
+            }
+        }
+    }
+
+    if (!manager) {
+        // Fallback or Error State logic
+        // Ideally we might try to link by email here if not linked, but for now just safe guard
+        return (
+            <div className="p-8 text-center">
+                <h1 className="text-2xl font-bold text-red-500 mb-4">Manager Profile Not Found</h1>
+                <p className="text-white mb-4">
+                    We couldn't find a hiring manager profile linked to your account.
+                </p>
+                <div className="text-sm text-gray-400">
+                    User Email: {user.email}<br />
+                    User ID: {user.id}
+                </div>
+            </div>
+        );
+    }
 
     let slots: any[] = [];
     if (manager) {
@@ -65,7 +105,7 @@ export default async function ManagerAvailabilityPage({ searchParams }: PageProp
                 </div>
             )}
 
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-8">Availability Management</h1>
+            {/* Request Context Banner */}
 
             {/* Calendar Connection */}
             <section className="mb-8">

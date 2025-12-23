@@ -49,13 +49,26 @@ export default async function BookingPage({ params }: PageProps) {
     const atLeastOneManagers = templateManagers?.filter(m => m.role_type === 'at_least_one').map(m => m.hiring_manager_id) || [];
     const requiredCount = template.required_interviewers_count || 1;
 
-    // Fetch open slots with hiring manager info
+    // Fetch open slots for the relevant managers
+    // We want slots for ANY of the possible managers primarily.
+    // Ideally, we fetch slots where hiring_manager_id IN (all relevant managers)
+    // AND status = 'open'
+    // AND start_time > now
+
+    // We need a list of all potential manager IDs to fetch slots for
+    const allManagerIds = templateManagers?.map(m => m.hiring_manager_id) || [];
+
+    if (allManagerIds.length === 0) {
+        // No managers, no slots
+        console.log('[Debug] No managers assigned to this template.');
+    }
+
     const { data: rawSlots } = await supabase
         .from('slots')
         .select('*')
-        .eq('template_id', templateId)
+        .in('hiring_manager_id', allManagerIds) // Changed from .eq('template_id', templateId)
         .eq('status', 'open')
-        .gte('start_time', new Date().toISOString()) // Only future slots
+        .gte('start_time', new Date().toISOString())
         .order('start_time', { ascending: true });
 
     // Group slots by start time
@@ -88,7 +101,6 @@ export default async function BookingPage({ params }: PageProps) {
         // 4. Construct valid panel
         // We need to pick exactly 'requiredCount' slots to book.
         // Priority: Mandatory -> At Least One -> Optional
-        // But simply taking the first N including mandatories is usually fine, 
         // as long as we satisfy the rules.
 
         // Sort slots by priority: Mandatory < AtLeastOne < Optional

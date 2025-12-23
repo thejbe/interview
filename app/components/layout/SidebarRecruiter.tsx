@@ -48,9 +48,14 @@ export function SidebarRecruiter() {
                     </Link>
 
                     {/* Bookings */}
-                    <Link href="#" className="flex items-center gap-3 px-3 py-2 rounded-full hover:bg-white/10 transition-colors duration-200 nav-link">
-                        <span className="material-symbols-outlined text-white text-2xl font-light">calendar_add_on</span>
-                        <p className="text-white text-sm font-medium leading-normal">Bookings</p>
+                    <Link
+                        href="/recruiter/bookings"
+                        className={`flex items-center gap-3 px-3 py-2 rounded-full transition-colors duration-200 nav-link ${isActive('/recruiter/bookings') ? 'bg-primary' : 'hover:bg-white/10'}`}
+                    >
+                        <span className={`material-symbols-outlined text-2xl ${isActive('/recruiter/bookings') ? 'text-background-dark' : 'text-white font-light'}`}>
+                            calendar_add_on
+                        </span>
+                        <p className={`text-sm font-bold leading-normal ${isActive('/recruiter/bookings') ? 'text-background-dark' : 'text-white'}`}>Bookings</p>
                     </Link>
 
                     {/* Settings */}

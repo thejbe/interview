@@ -14,11 +14,21 @@ export default async function TemplatesPage() {
       *,
       companies ( name ),
       template_hiring_managers (
+        hiring_manager_id,
         availability_status,
         hiring_managers ( name, email, role )
       )
     `)
         .order('created_at', { ascending: false });
+
+    // Fetch all managers who have at least one open future slot
+    const { data: slotsData } = await supabase
+        .from('slots')
+        .select('hiring_manager_id')
+        .eq('status', 'open')
+        .gte('start_time', new Date().toISOString());
+
+    const availableManagerIds = new Set(slotsData?.map(s => s.hiring_manager_id));
 
     return (
         <div>
@@ -55,8 +65,10 @@ export default async function TemplatesPage() {
                                 templates.map((template) => {
                                     const managers = template.template_hiring_managers || [];
                                     const total = managers.length;
-                                    const provided = managers.filter((m: any) => m.availability_status === 'provided').length;
-                                    const pending = managers.filter((m: any) => m.availability_status === 'pending').length;
+
+                                    // Calculate status dynamically based on global slots
+                                    const provided = managers.filter((m: any) => availableManagerIds.has(m.hiring_manager_id)).length;
+                                    const pending = total - provided;
 
                                     // Status Logic
                                     let statusColor = 'bg-gray-700 text-gray-300';
@@ -75,13 +87,23 @@ export default async function TemplatesPage() {
                                             <td className="px-6 py-4">
                                                 <div className="flex -space-x-2">
                                                     {/* @ts-ignore */}
-                                                    {template.template_hiring_managers?.slice(0, 3).map((thm: any, idx: number) => (
-                                                        <div key={idx}
-                                                            title={`${thm.hiring_managers?.name} ${thm.hiring_managers?.role ? `(${thm.hiring_managers.role})` : ''} - ${thm.availability_status}`}
-                                                            className={`w-6 h-6 rounded-full border border-[#152211] flex items-center justify-center text-xs text-white ${thm.availability_status === 'provided' ? 'bg-green-700' : (thm.availability_status === 'requested' ? 'bg-yellow-700' : 'bg-gray-500')}`}>
-                                                            {thm.hiring_managers?.name?.[0] || 'U'}
-                                                        </div>
-                                                    ))}
+                                                    {/* @ts-ignore */}
+                                                    {template.template_hiring_managers?.slice(0, 3).map((thm: any, idx: number) => {
+                                                        const isProvided = availableManagerIds.has(thm.hiring_manager_id);
+                                                        // Priority: Provided (Green) > Requested (Yellow) > Default (Gray)
+                                                        let colorClass = 'bg-gray-500';
+                                                        if (isProvided) colorClass = 'bg-green-700';
+                                                        else if (thm.availability_status === 'requested') colorClass = 'bg-yellow-700';
+
+                                                        return (
+                                                            <div key={idx}
+                                                                title={`${thm.hiring_managers?.name} ${thm.hiring_managers?.role ? `(${thm.hiring_managers.role})` : ''} - ${isProvided ? 'Has Availability' : thm.availability_status}`}
+                                                                className={`w-6 h-6 rounded-full border border-[#152211] flex items-center justify-center text-xs text-white ${colorClass}`}>
+                                                                {thm.hiring_managers?.name?.[0] || 'U'}
+                                                            </div>
+                                                        );
+                                                    })}
+
                                                     {/* @ts-ignore */}
                                                     {(template.template_hiring_managers?.length || 0) > 3 && (
                                                         <div className="w-6 h-6 rounded-full bg-gray-700 border border-[#152211] flex items-center justify-center text-[10px] text-white">
