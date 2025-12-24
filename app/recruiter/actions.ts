@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
+import { redirect } from 'next/navigation';
 
 export async function getEmailTemplate(key: string) {
     const supabase = await createClient();
@@ -193,6 +194,113 @@ export async function createManualBooking(
         return { success: true };
     } catch (error: any) {
         console.error('Failed to manually book:', error);
+        return { success: false, message: error.message };
+    }
+}
+
+export async function signOut() {
+    const supabase = await createClient();
+    await supabase.auth.signOut();
+    revalidatePath('/', 'layout');
+    redirect('/login');
+}
+
+export async function inviteUser(email: string, role: 'admin' | 'member' = 'member') {
+    const supabase = await createClient();
+
+    try {
+        // 1. Get Current User's Org
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) throw new Error('Not authenticated');
+
+        const { data: rec } = await supabase
+            .from('recruiters')
+            .select('id, organization_id')
+            .eq('auth_user_id', user.id)
+            .single();
+
+        if (!rec || !rec.organization_id) throw new Error('User not associated with an organization');
+
+        // 2. Generate Token
+        const token = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+
+        // 3. Create Invitation
+        const { error } = await supabase
+            .from('invitations')
+            .insert({
+                email,
+                token,
+                organization_id: rec.organization_id,
+                invited_by: rec.id,
+                role
+            });
+
+        if (error) throw error;
+
+        // 4. Send Email (Mock)
+        // In prod: Email service. Link: `${process.env.NEXT_PUBLIC_BASE_URL}/register?token=${token}`
+        console.log(`--- MOCK INVITE ---`);
+        console.log(`To: ${email}`);
+        console.log(`Token: ${token}`);
+        console.log(`Link: http://localhost:3000/register?token=${token}`);
+        console.log(`-------------------`);
+
+        revalidatePath('/recruiter/settings/team');
+        return { success: true, message: 'Invitation sent.' };
+    } catch (error: any) {
+        return { success: false, message: error.message };
+    }
+}
+
+export async function registerUser(token: string, name: string, password: string) {
+    const supabase = await createClient();
+
+    try {
+        // 1. Validate Token
+        const { data: invitation } = await supabase
+            .from('invitations')
+            .select('*')
+            .eq('token', token)
+            .eq('status', 'pending')
+            .single();
+
+        if (!invitation) throw new Error('Invalid or expired invitation token');
+
+        // 2. Sign Up User
+        const { data: authData, error: authError } = await supabase.auth.signUp({
+            email: invitation.email,
+            password,
+            options: {
+                data: {
+                    full_name: name
+                }
+            }
+        });
+
+        if (authError) throw authError;
+        if (!authData.user) throw new Error('Failed to create user');
+
+        // 3. Create Recruiter Profile
+        const { error: profileError } = await supabase
+            .from('recruiters')
+            .insert({
+                auth_user_id: authData.user.id,
+                organization_id: invitation.organization_id,
+                name: name,
+                email: invitation.email,
+                role: invitation.role
+            });
+
+        if (profileError) throw profileError;
+
+        // 4. Update Invitation Status
+        await supabase
+            .from('invitations')
+            .update({ status: 'accepted' })
+            .eq('id', invitation.id);
+
+        return { success: true };
+    } catch (error: any) {
         return { success: false, message: error.message };
     }
 }

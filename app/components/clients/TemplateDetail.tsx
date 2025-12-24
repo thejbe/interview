@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Button } from '@/app/components/ui/Button';
 import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
+import { format } from 'date-fns';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 interface TemplateDetailProps {
@@ -63,8 +64,8 @@ export function TemplateDetail({ templateId, bookings }: TemplateDetailProps) {
                                     </div>
                                     <div className="text-[10px] bg-yellow-900/30 text-yellow-500 px-1.5 py-0.5 rounded border border-yellow-900/50">Invited</div>
                                 </div>
-                                <div className="text-xs text-white/40 mb-3">
-                                    Invited {new Date(p.created_at).toLocaleDateString()}
+                                <div className="text-xs text-white/40 mb-3" suppressHydrationWarning>
+                                    Invited {format(new Date(p.created_at), 'dd MMM yyyy')}
                                 </div>
                                 <div className="flex gap-2">
                                     {p.invite_token && (

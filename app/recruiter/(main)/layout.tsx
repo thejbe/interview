@@ -11,12 +11,24 @@ export default async function RecruiterMainLayout({
     const recentIds = await getRecentClientIds();
 
     // Fetch data in parallel
-    const [{ data: allClients }, { data: recentClientsData }] = await Promise.all([
+    const [{ data: userSession }, { data: allClients }, { data: recentClientsData }] = await Promise.all([
+        supabase.auth.getUser(),
         supabase.from('companies').select('id, name').order('name'),
         recentIds.length > 0
             ? supabase.from('companies').select('id, name').in('id', recentIds)
             : Promise.resolve({ data: [] })
     ]);
+
+    // Fetch recruiter profile details
+    let recruiterProfile = null;
+    if (userSession?.user) {
+        const { data: rec } = await supabase
+            .from('recruiters')
+            .select('name, role, avatar_url, email')
+            .eq('auth_user_id', userSession.user.id)
+            .single();
+        recruiterProfile = rec;
+    }
 
     // Sort recent clients to match the order of IDs in the cookie
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -25,6 +37,7 @@ export default async function RecruiterMainLayout({
     return (
         <AppShell
             role="recruiter"
+            user={recruiterProfile}
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             recentClients={recentClients as any[]}
             // eslint-disable-next-line @typescript-eslint/no-explicit-any

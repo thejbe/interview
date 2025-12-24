@@ -8,12 +8,14 @@ interface AppShellProps {
     recentClients?: any[];
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     allClients?: any[];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    user?: any;
 }
 
-export function AppShell({ children, role, recentClients, allClients }: AppShellProps) {
+export function AppShell({ children, role, recentClients, allClients, user }: AppShellProps) {
     return (
         <div className="flex bg-background-light dark:bg-background-dark min-h-screen">
-            {role === 'recruiter' ? <SidebarRecruiter recentClients={recentClients} allClients={allClients} /> : <SidebarManager />}
+            {role === 'recruiter' ? <SidebarRecruiter recentClients={recentClients} allClients={allClients} user={user} /> : <SidebarManager />}
 
             <div className="flex flex-1 flex-col transition-all w-full min-w-0">
                 {children}

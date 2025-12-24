@@ -1,19 +1,37 @@
 "use client";
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
+import { signOut } from '@/app/recruiter/actions';
 
 interface SidebarRecruiterProps {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     recentClients?: any[];
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     allClients?: any[];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    user?: any;
 }
 
-export function SidebarRecruiter({ recentClients = [], allClients = [] }: SidebarRecruiterProps) {
+export function SidebarRecruiter({ recentClients = [], allClients = [], user }: SidebarRecruiterProps) {
     const pathname = usePathname();
     const router = useRouter();
     const [searchQuery, setSearchQuery] = useState('');
+    const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+    const userMenuRef = useRef<HTMLDivElement>(null);
+
+    // Close menu when clicking outside
+    useEffect(() => {
+        function handleClickOutside(event: MouseEvent) {
+            if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
+                setIsUserMenuOpen(false);
+            }
+        }
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, []);
 
     const isActive = (path: string) => pathname?.startsWith(path);
 
@@ -26,6 +44,8 @@ export function SidebarRecruiter({ recentClients = [], allClients = [] }: Sideba
         router.push(`/recruiter/clients/${id}/dashboard`);
         setSearchQuery('');
     };
+
+    const avatarUrl = user?.avatar_url || 'https://lh3.googleusercontent.com/aida-public/AB6AXuCCmoIGdqE80auShoJkDGChmIB4DrOf1IQ0vaFKYOX7AGKphgefGV5o-2LwMCjrItNsnJy1wKzzfgGD25f1CHnl5CeVQD9OaHcHkMMypsWJDefUG1ErFL2v3V-HDDv_ZmoIUKruZ7dxlLP2nX4b4ZcVm7pC-oPjWUWlplrpfj40cSyERHXfWwdpVz8ymc-akLciztsma1YcpvdyorMNWtwe_8_X0dJyVXygwPfSlllbDL_JcsPabxqKBUUESoRfj4-MU1VZ19vPLjGW';
 
     return (
         <aside className="flex flex-col w-64 bg-[#142210] p-4 font-display flex-shrink-0 border-r border-[#2c4823] h-screen sticky top-0 overflow-hidden">
@@ -49,9 +69,6 @@ export function SidebarRecruiter({ recentClients = [], allClients = [] }: Sideba
                             onChange={(e) => setSearchQuery(e.target.value)}
                         />
                     </label>
-
-                    {/* Search Results Dropdown (Overlay) or Inline? Let's do Inline replacement of Recents. */}
-                    {/* Actually, user said 'Client section with search and the last 5 clients accessed links below'. */}
                 </div>
 
                 {/* Navigation / Client List */}
@@ -100,7 +117,6 @@ export function SidebarRecruiter({ recentClients = [], allClients = [] }: Sideba
 
                             <h3 className="px-4 text-[10px] uppercase font-bold text-[#9fc992] tracking-wider mb-2 mt-2">Menu</h3>
 
-                            {/* Clients Index */}
                             <Link
                                 href="/recruiter/clients"
                                 className={`flex items-center gap-3 px-3 py-2 rounded-full transition-colors duration-200 nav-link ${isActive('/recruiter/clients') && !pathname?.includes('/dashboard') ? 'bg-primary/20 text-white' : 'hover:bg-white/10 text-gray-300'}`}
@@ -109,7 +125,6 @@ export function SidebarRecruiter({ recentClients = [], allClients = [] }: Sideba
                                 <p className="text-sm font-medium">All Clients</p>
                             </Link>
 
-                            {/* Templates */}
                             <Link
                                 href="/recruiter/templates"
                                 className={`flex items-center gap-3 px-3 py-2 rounded-full transition-colors duration-200 nav-link ${isActive('/recruiter/templates') ? 'bg-primary text-[#142210]' : 'hover:bg-white/10 text-gray-300'}`}
@@ -118,7 +133,6 @@ export function SidebarRecruiter({ recentClients = [], allClients = [] }: Sideba
                                 <p className="text-sm font-medium">Templates</p>
                             </Link>
 
-                            {/* Bookings */}
                             <Link
                                 href="/recruiter/bookings"
                                 className={`flex items-center gap-3 px-3 py-2 rounded-full transition-colors duration-200 nav-link ${isActive('/recruiter/bookings') ? 'bg-primary text-[#142210]' : 'hover:bg-white/10 text-gray-300'}`}
@@ -127,7 +141,6 @@ export function SidebarRecruiter({ recentClients = [], allClients = [] }: Sideba
                                 <p className="text-sm font-medium">Bookings</p>
                             </Link>
 
-                            {/* Settings */}
                             <Link href="#" className="flex items-center gap-3 px-3 py-2 rounded-full hover:bg-white/10 transition-colors duration-200 nav-link text-gray-300">
                                 <span className="material-symbols-outlined text-xl">settings</span>
                                 <p className="text-sm font-medium">Settings</p>
@@ -137,15 +150,55 @@ export function SidebarRecruiter({ recentClients = [], allClients = [] }: Sideba
                 </nav>
             </div>
 
-            <div className="mt-auto border-t border-[#2c4823] pt-4">
-                <div className="flex items-center gap-3 p-2">
-                    <div className="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-8"
-                        style={{ backgroundImage: 'url("https://lh3.googleusercontent.com/aida-public/AB6AXuCCmoIGdqE80auShoJkDGChmIB4DrOf1IQ0vaFKYOX7AGKphgefGV5o-2LwMCjrItNsnJy1wKzzfgGD25f1CHnl5CeVQD9OaHcHkMMypsWJDefUG1ErFL2v3V-HDDv_ZmoIUKruZ7dxlLP2nX4b4ZcVm7pC-oPjWUWlplrpfj40cSyERHXfWwdpVz8ymc-akLciztsma1YcpvdyorMNWtwe_8_X0dJyVXygwPfSlllbDL_JcsPabxqKBUUESoRfj4-MU1VZ19vPLjGW")' }}>
-                    </div>
-                    <div className="flex flex-col overflow-hidden">
-                        <h3 className="text-white text-sm font-medium leading-tight truncate">Alex Chen</h3>
-                        <p className="text-gray-400 text-xs font-normal leading-tight">Recruiter</p>
-                    </div>
+            <div className="mt-auto border-t border-[#2c4823] p-2" ref={userMenuRef}>
+                <div className="relative">
+                    <button
+                        onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+                        className="flex items-center gap-3 p-2 w-full rounded-lg hover:bg-white/10 transition-colors text-left"
+                    >
+                        <div className="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-8 shrink-0"
+                            style={{ backgroundImage: `url("${avatarUrl}")` }}>
+                        </div>
+                        <div className="flex flex-col overflow-hidden">
+                            <h3 className="text-white text-sm font-medium leading-tight truncate">{user?.name || 'Recruiter'}</h3>
+                            <p className="text-gray-400 text-xs font-normal leading-tight truncate">{user?.role === 'admin' ? 'Admin' : 'Recruiter'}</p>
+                        </div>
+                        <span className="material-symbols-outlined text-gray-400 ml-auto text-lg">
+                            {isUserMenuOpen ? 'expand_less' : 'expand_more'}
+                        </span>
+                    </button>
+
+                    {isUserMenuOpen && (
+                        <div className="absolute bottom-full left-0 w-full mb-2 bg-[#1C1C1C] border border-[#2c4823] rounded-xl shadow-xl overflow-hidden animate-in fade-in slide-in-from-bottom-2 z-50">
+                            <div className="p-1">
+                                {user?.role === 'admin' && (
+                                    <Link
+                                        href="/recruiter/settings/team"
+                                        onClick={() => setIsUserMenuOpen(false)}
+                                        className="flex items-center gap-3 px-3 py-2 text-sm text-gray-300 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
+                                    >
+                                        <span className="material-symbols-outlined text-lg">group</span>
+                                        Team Settings
+                                    </Link>
+                                )}
+                                <Link
+                                    href="/recruiter/profile"
+                                    onClick={() => setIsUserMenuOpen(false)}
+                                    className="flex items-center gap-3 px-3 py-2 text-sm text-gray-300 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
+                                >
+                                    <span className="material-symbols-outlined text-lg">person</span>
+                                    Profile
+                                </Link>
+                                <button
+                                    onClick={() => signOut()}
+                                    className="w-full flex items-center gap-3 px-3 py-2 text-sm text-[#ff6b6b] hover:bg-[#ff6b6b]/10 rounded-lg transition-colors text-left"
+                                >
+                                    <span className="material-symbols-outlined text-lg">logout</span>
+                                    Log out
+                                </button>
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
         </aside>
