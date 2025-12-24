@@ -7,6 +7,7 @@ import { createClient } from '@/lib/supabase/client';
 import { Button } from '@/app/components/ui/Button';
 import { Input } from '@/app/components/ui/Input';
 import { sendAvailabilityRequest, getEmailTemplate } from "@/app/recruiter/actions";
+import { toast } from 'sonner';
 import { Header } from '@/app/components/layout/Header';
 
 // Types
@@ -128,7 +129,7 @@ export function TemplateForm({ initialData, companies, managers, departments, mo
         if (!targetId) return;
         const link = getLink(targetId);
         navigator.clipboard.writeText(link);
-        alert('Link copied to clipboard');
+        toast.success('Link copied to clipboard');
     };
 
     const handleRequestAvailability = async (templateIdToUse?: string) => {
@@ -142,7 +143,7 @@ export function TemplateForm({ initialData, companies, managers, departments, mo
             setEmailBody(template.body);
             setShowEmailModal(true);
         } else {
-            alert('Error: Could not load email template.');
+            toast.error('Error: Could not load email template.');
         }
     };
 
@@ -156,7 +157,7 @@ export function TemplateForm({ initialData, companies, managers, departments, mo
         setShowEmailModal(false);
 
         if (result.success) {
-            alert(result.message);
+            toast.success(result.message);
             // If post-save flow, redirect now
             if (savedTemplateId) {
                 if (onSuccess) {
@@ -169,7 +170,7 @@ export function TemplateForm({ initialData, companies, managers, departments, mo
                 router.refresh();
             }
         } else {
-            alert('Error: ' + result.message);
+            toast.error('Error: ' + result.message);
         }
     };
 
@@ -226,7 +227,7 @@ export function TemplateForm({ initialData, companies, managers, departments, mo
             setNewMgrRole('');
             setIsAddingManager(false);
         } catch (err: any) {
-            alert('Error adding manager: ' + err.message);
+            toast.error('Error adding manager: ' + err.message);
         } finally {
             setCreateMgrLoading(false);
         }
@@ -298,7 +299,7 @@ export function TemplateForm({ initialData, companies, managers, departments, mo
 
         } catch (err: any) {
             console.error(err);
-            alert('Error saving template: ' + err.message);
+            toast.error('Error saving template: ' + err.message);
         } finally {
             setLoading(false);
         }

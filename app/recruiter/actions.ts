@@ -202,7 +202,7 @@ export async function signOut() {
     const supabase = await createClient();
     await supabase.auth.signOut();
     revalidatePath('/', 'layout');
-    redirect('/login');
+    redirect('/recruiter/login');
 }
 
 export async function inviteUser(email: string, role: 'admin' | 'member' = 'member') {

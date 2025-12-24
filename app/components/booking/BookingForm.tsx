@@ -8,6 +8,7 @@ import {
     startOfMonth, endOfMonth, startOfWeek, endOfWeek, eachDayOfInterval,
     format, addMonths, subMonths, isSameMonth, isSameDay
 } from 'date-fns';
+import { toast } from 'sonner';
 
 interface Slot {
     id: string;
@@ -119,7 +120,7 @@ export function BookingForm({ slots, templateId, briefingText, existingBooking, 
         // Check if slot still open
         const { data: slotCheck } = await supabase.from('slots').select('status').eq('id', selectedSlotId).single();
         if (!slotCheck || slotCheck.status !== 'open') {
-            alert('This slot is no longer available. Please choose another.');
+            toast.error('This slot is no longer available. Please choose another.');
             setLoading(false);
             return;
         }
@@ -140,7 +141,7 @@ export function BookingForm({ slots, templateId, briefingText, existingBooking, 
 
         if (bookingError) {
             console.error(bookingError);
-            alert('Error creating booking: ' + bookingError.message);
+            toast.error('Error creating booking: ' + bookingError.message);
             setLoading(false);
             return;
         }

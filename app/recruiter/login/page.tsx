@@ -31,7 +31,7 @@ export default function RecruiterLoginPage() {
                 throw error;
             }
 
-            router.push('/recruiter/dashboard');
+            router.push('/recruiter');
             router.refresh();
         } catch (err: any) {
             setError(err.message);

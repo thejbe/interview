@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { Button } from '@/app/components/ui/Button';
+import { toast } from 'sonner';
 import { createManualBooking } from '@/app/recruiter/actions';
 
 interface ManualBookingModalProps {
@@ -35,10 +36,10 @@ export function ManualBookingModal({ bookingId, templateId, managers, duration, 
                 meetingPlatform
             );
             onClose();
-            alert('Candidate manually booked!');
+            toast.success('Candidate manually booked!');
         } catch (error) {
             console.error('Failed to book:', error);
-            alert('Failed to override booking');
+            toast.error('Failed to override booking');
         } finally {
             setLoading(false);
         }

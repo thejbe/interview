@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Button } from '@/app/components/ui/Button';
 import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
 
 interface BookingEntryFormProps {
     templates: any[]; // Interview templates
@@ -87,7 +88,7 @@ export function BookingEntryForm({ templates, onSuccess }: BookingEntryFormProps
                 // Update slot status
                 await supabase.from('slots').update({ status: 'booked' }).eq('id', selectedSlotId);
 
-                alert('Interview booked successfully!');
+                toast.success('Interview booked successfully!');
 
                 if (onSuccess) {
                     onSuccess();
@@ -115,7 +116,7 @@ export function BookingEntryForm({ templates, onSuccess }: BookingEntryFormProps
                 setInviteLink(link);
             }
         } catch (err: any) {
-            alert('Error: ' + err.message);
+            toast.error('Error: ' + err.message);
         } finally {
             setIsSubmitting(false);
         }
@@ -258,7 +259,7 @@ export function BookingEntryForm({ templates, onSuccess }: BookingEntryFormProps
                             variant="secondary"
                             onClick={() => {
                                 navigator.clipboard.writeText(inviteLink);
-                                alert('Copied!');
+                                toast.success('Copied!');
                             }}
                         >
                             Copy

@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { Button } from '@/app/components/ui/Button';
+import { toast } from 'sonner';
 import { createCandidateInvite } from '@/app/recruiter/actions';
 import { ManualBookingModal } from './ManualBookingModal';
 
@@ -46,7 +47,7 @@ export function CandidateManager({ templateId, candidates, managers, durationPro
             setMeetingPlatform('');
         } catch (error) {
             console.error('Failed to invite:', error);
-            alert('Failed to send invite');
+            toast.error('Failed to send invite');
         } finally {
             setLoading(false);
         }
@@ -55,7 +56,7 @@ export function CandidateManager({ templateId, candidates, managers, durationPro
     const copyLink = (token: string) => {
         const link = `${window.location.origin}/booking/${token}`;
         navigator.clipboard.writeText(link);
-        alert('Booking link copied to clipboard!');
+        toast.success('Booking link copied to clipboard!');
     };
 
     return (

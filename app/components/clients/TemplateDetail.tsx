@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from 'react';
-import { Button } from '@/app/components/ui/Button';
+// import { useState } from 'react';
+// import { Button } from '@/app/components/ui/Button';
 import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
 import { format } from 'date-fns';
+import { toast } from 'sonner';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 interface TemplateDetailProps {
@@ -39,7 +40,7 @@ export function TemplateDetail({ templateId, bookings }: TemplateDetailProps) {
     const handleCopyLink = (token: string) => {
         const link = `${window.location.origin}/booking/${token}`;
         navigator.clipboard.writeText(link);
-        alert("Invite link taken to clipboard!");
+        toast.success("Invite link copied to clipboard!");
     };
 
     return (
@@ -147,7 +148,7 @@ export function TemplateDetail({ templateId, bookings }: TemplateDetailProps) {
                                     </div>
                                     <p className="text-xs text-white/60 mb-3">{s.candidate_email}</p>
                                     <button
-                                        onClick={() => { alert('Rebook flow to be implemented (reuse BookingModal)'); }}
+                                        onClick={() => { toast.info('Rebook flow to be implemented (reuse BookingModal)'); }}
                                         className="w-full py-1.5 text-xs border border-[#2c4823] hover:bg-[#2c4823] text-[#9fc992] hover:text-white rounded transition-colors"
                                     >
                                         Rebook

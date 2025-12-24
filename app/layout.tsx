@@ -12,6 +12,10 @@ export const metadata: Metadata = {
   description: "Advanced interview scheduling platform",
 };
 
+import { Toaster } from 'sonner';
+
+// ... imports
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -27,6 +31,7 @@ export default function RootLayout({
         suppressHydrationWarning
       >
         {children}
+        <Toaster richColors position="top-right" theme="dark" />
       </body>
     </html>
   );

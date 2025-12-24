@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
+import { toast } from 'sonner';
 import { Button } from '@/app/components/ui/Button';
 import { Input } from '@/app/components/ui/Input';
 
@@ -131,7 +132,7 @@ export function ClientForm({ initialData, initialDepartments = [], initialManage
 
             cancelManagerForm();
         } catch (err: any) {
-            alert('Error saving manager: ' + err.message);
+            toast.error('Error saving manager: ' + err.message);
         }
     };
 
@@ -190,7 +191,7 @@ export function ClientForm({ initialData, initialDepartments = [], initialManage
             router.refresh();
         } catch (err: any) {
             console.error(err);
-            alert('Error saving client: ' + err.message);
+            toast.error('Error saving client: ' + err.message);
         } finally {
             setLoading(false);
         }
@@ -212,7 +213,7 @@ export function ClientForm({ initialData, initialDepartments = [], initialManage
             setNewDeptName('');
             setAddingDept(false);
         } catch (err: any) {
-            alert('Error adding department: ' + err.message);
+            toast.error('Error adding department: ' + err.message);
         }
     };
 
@@ -223,7 +224,7 @@ export function ClientForm({ initialData, initialDepartments = [], initialManage
             if (error) throw error;
             setDepartments(departments.filter(d => d.id !== id));
         } catch (err: any) {
-            alert('Error deleting department: ' + err.message);
+            toast.error('Error deleting department: ' + err.message);
         }
     };
 
@@ -250,7 +251,7 @@ export function ClientForm({ initialData, initialDepartments = [], initialManage
             setDepartments(departments.map(d => d.id === id ? { ...d, name: editingDeptName } : d));
             cancelEditDepartment();
         } catch (err: any) {
-            alert('Error updating department: ' + err.message);
+            toast.error('Error updating department: ' + err.message);
         }
     };
 
