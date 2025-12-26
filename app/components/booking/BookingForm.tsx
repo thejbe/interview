@@ -23,7 +23,7 @@ interface BookingFormProps {
     slots: Slot[];
     templateId: string;
     briefingText?: string;
-    existingBooking?: { candidate_name: string; candidate_email: string; candidate_phone: string };
+    existingBooking?: { id?: string; candidate_name: string; candidate_email: string; candidate_phone: string };
     onlineLink?: string;
     managers?: Record<string, { name: string; role?: string }>;
 }
@@ -125,19 +125,39 @@ export function BookingForm({ slots, templateId, briefingText, existingBooking, 
             return;
         }
 
-        // Create booking
-        const inviteToken = crypto.randomUUID();
+        // Create or Update booking
+        let bookingError;
+        let finalToken = crypto.randomUUID();
 
-        const { error: bookingError } = await supabase.from('bookings').insert({
-            slot_id: selectedSlotId,
-            candidate_name: formData.name,
-            candidate_email: formData.email,
-            candidate_phone: formData.phone,
-            status: 'confirmed',
-            token: inviteToken,
-            template_id: templateId,
-            additional_slot_ids: slots.find(s => s.id === selectedSlotId)?.additional_slot_ids || []
-        });
+        if (existingBooking?.id) {
+            // Update existing
+            const { error } = await supabase.from('bookings').update({
+                slot_id: selectedSlotId,
+                candidate_name: formData.name,
+                candidate_email: formData.email,
+                candidate_phone: formData.phone,
+                status: 'confirmed',
+                // Keep existing token if we want, or rotate? Usually keep for reference.
+                // existingBooking should have the token, but we might not have passed it in logic below (via props).
+                // Let's assume we don't change the token unless necessary.
+                template_id: templateId,
+                additional_slot_ids: slots.find(s => s.id === selectedSlotId)?.additional_slot_ids || []
+            }).eq('id', existingBooking.id);
+            bookingError = error;
+        } else {
+            // Insert new
+            const { error } = await supabase.from('bookings').insert({
+                slot_id: selectedSlotId,
+                candidate_name: formData.name,
+                candidate_email: formData.email,
+                candidate_phone: formData.phone,
+                status: 'confirmed',
+                token: finalToken,
+                template_id: templateId,
+                additional_slot_ids: slots.find(s => s.id === selectedSlotId)?.additional_slot_ids || []
+            });
+            bookingError = error;
+        }
 
         if (bookingError) {
             console.error(bookingError);

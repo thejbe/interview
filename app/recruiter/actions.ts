@@ -97,9 +97,7 @@ export async function sendAvailabilityRequest(
 export async function createCandidateInvite(
     templateId: string,
     name: string,
-    email: string,
-    meetingLink?: string,
-    meetingPlatform?: string
+    email: string
 ) {
     const supabase = await createClient();
 
@@ -116,9 +114,6 @@ export async function createCandidateInvite(
                 token: token,
                 status: 'pending',
                 slot_id: null, // Explicitly null for invite
-                timezone: 'UTC', // Default, will be updated by candidate
-                meeting_link: meetingLink || null,
-                meeting_platform: meetingPlatform || null
             })
             .select()
             .single();
@@ -139,9 +134,7 @@ export async function createManualBooking(
     date: string,
     startTime: string, // "HH:MM"
     durationMinutes: number,
-    managerIds: string[],
-    meetingLink?: string,
-    meetingPlatform?: string
+    managerIds: string[]
 ) {
     const supabase = await createClient();
 
@@ -180,11 +173,7 @@ export async function createManualBooking(
             .from('bookings')
             .update({
                 slot_id: primarySlot.id,
-                additional_slot_ids: additionalSlots,
                 status: 'confirmed',
-                timezone: 'UTC', // Default for override
-                meeting_link: meetingLink || null,
-                meeting_platform: meetingPlatform || null
             })
             .eq('id', bookingId);
 
