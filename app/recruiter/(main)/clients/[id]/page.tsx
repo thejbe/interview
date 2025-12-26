@@ -63,7 +63,7 @@ export default async function ClientEditorPage({ params }: PageProps) {
             <main className="flex-1 p-8 overflow-y-auto">
                 <ClientForm
                     mode={isNew ? 'create' : 'edit'}
-                    initialData={client}
+                    initialData={client || undefined}
                     initialDepartments={departments}
                     initialManagers={managers}
                 />

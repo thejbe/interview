@@ -113,7 +113,7 @@ export function ClientForm({ initialData, initialDepartments = [], initialManage
                     .select().single();
 
                 if (error) throw error;
-                savedManager = data;
+                savedManager = data as unknown as HiringManager;
 
                 // Update local state
                 setManagers(managers.map(m => m.id === editingManagerId ? savedManager : m));
@@ -124,7 +124,7 @@ export function ClientForm({ initialData, initialDepartments = [], initialManage
                     .select().single();
 
                 if (error) throw error;
-                savedManager = data;
+                savedManager = data as unknown as HiringManager;
 
                 // Add to local state
                 setManagers([...managers, savedManager]);

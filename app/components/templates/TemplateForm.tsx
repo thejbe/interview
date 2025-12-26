@@ -219,7 +219,7 @@ export function TemplateForm({ initialData, companies, managers, departments, mo
             }).select().single();
 
             if (error) throw error;
-            setAllManagers(prev => [...prev, data]);
+            setAllManagers(prev => [...prev, data as unknown as HiringManager]);
             setSelectedManagers(prev => [...prev, { id: data.id, role_type: 'mandatory' }]);
 
             setNewMgrName('');

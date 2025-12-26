@@ -6,9 +6,38 @@ export type Json =
     | { [key: string]: Json | undefined }
     | Json[]
 
-export interface Database {
+export type Database = {
     public: {
         Tables: {
+            departments: {
+                Row: {
+                    id: string
+                    company_id: string | null
+                    name: string
+                    created_at: string
+                }
+                Insert: {
+                    id?: string
+                    company_id?: string | null
+                    name: string
+                    created_at?: string
+                }
+                Update: {
+                    id?: string
+                    company_id?: string | null
+                    name?: string
+                    created_at?: string
+                }
+                Relationships: [
+                    {
+                        foreignKeyName: "departments_company_id_fkey"
+                        columns: ["company_id"]
+                        isOneToOne: false
+                        referencedRelation: "companies"
+                        referencedColumns: ["id"]
+                    }
+                ]
+            }
             organizations: {
                 Row: {
                     id: string
@@ -25,6 +54,7 @@ export interface Database {
                     name?: string
                     created_at?: string
                 }
+                Relationships: []
             }
             recruiters: {
                 Row: {
@@ -57,6 +87,15 @@ export interface Database {
                     role?: 'admin' | 'member' | null
                     created_at?: string
                 }
+                Relationships: [
+                    {
+                        foreignKeyName: "recruiters_organization_id_fkey"
+                        columns: ["organization_id"]
+                        isOneToOne: false
+                        referencedRelation: "organizations"
+                        referencedColumns: ["id"]
+                    }
+                ]
             }
             companies: {
                 Row: {
@@ -64,25 +103,29 @@ export interface Database {
                     name: string
                     recruiter_id: string | null
                     organization_id: string | null
-                    created_at: string
                     active: boolean
+                    plan_tier: string
+                    created_at: string
                 }
                 Insert: {
                     id?: string
                     name: string
                     recruiter_id?: string | null
                     organization_id?: string | null
-                    created_at?: string
                     active?: boolean
+                    plan_tier?: string
+                    created_at?: string
                 }
                 Update: {
                     id?: string
                     name?: string
                     recruiter_id?: string | null
                     organization_id?: string | null
-                    created_at?: string
                     active?: boolean
+                    plan_tier?: string
+                    created_at?: string
                 }
+                Relationships: []
             }
             invitations: {
                 Row: {
@@ -115,55 +158,49 @@ export interface Database {
                     status?: 'pending' | 'accepted'
                     created_at?: string
                 }
+                Relationships: []
             }
             hiring_managers: {
                 Row: {
                     id: string
+                    auth_user_id: string | null
                     company_id: string | null
                     name: string | null
                     email: string | null
-                    department_id: string | null
+                    calendar_provider: 'google' | 'microsoft' | 'none'
+                    calendar_sync_status: string
+                    last_calendar_sync_at: string | null
                     role: string | null
+                    department_id: string | null
                     created_at: string
                 }
                 Insert: {
                     id?: string
+                    auth_user_id?: string | null
                     company_id?: string | null
                     name?: string | null
                     email?: string | null
-                    department_id?: string | null
+                    calendar_provider?: 'google' | 'microsoft' | 'none'
+                    calendar_sync_status?: string
+                    last_calendar_sync_at?: string | null
                     role?: string | null
+                    department_id?: string | null
                     created_at?: string
                 }
                 Update: {
                     id?: string
+                    auth_user_id?: string | null
                     company_id?: string | null
                     name?: string | null
                     email?: string | null
-                    department_id?: string | null
+                    calendar_provider?: 'google' | 'microsoft' | 'none'
+                    calendar_sync_status?: string
+                    last_calendar_sync_at?: string | null
                     role?: string | null
+                    department_id?: string | null
                     created_at?: string
                 }
-            }
-            departments: {
-                Row: {
-                    id: string
-                    company_id: string | null
-                    name: string
-                    created_at: string
-                }
-                Insert: {
-                    id?: string
-                    company_id?: string | null
-                    name: string
-                    created_at?: string
-                }
-                Update: {
-                    id?: string
-                    company_id?: string | null
-                    name?: string
-                    created_at?: string
-                }
+                Relationships: []
             }
             email_templates: {
                 Row: {
@@ -187,6 +224,7 @@ export interface Database {
                     body?: string
                     created_at?: string
                 }
+                Relationships: []
             }
             template_hiring_managers: {
                 Row: {
@@ -194,6 +232,7 @@ export interface Database {
                     hiring_manager_id: string
                     availability_status: string | null
                     last_request_sent_at: string | null
+                    role_type: string | null
                 }
                 Insert: {
                     template_id: string
@@ -206,86 +245,85 @@ export interface Database {
                     hiring_manager_id?: string
                     availability_status?: string | null
                     last_request_sent_at?: string | null
+                    role_type?: string | null
                 }
+                Relationships: [
+                    {
+                        foreignKeyName: "template_hiring_managers_hiring_manager_id_fkey"
+                        columns: ["hiring_manager_id"]
+                        isOneToOne: false
+                        referencedRelation: "hiring_managers"
+                        referencedColumns: ["id"]
+                    },
+                    {
+                        foreignKeyName: "template_hiring_managers_template_id_fkey"
+                        columns: ["template_id"]
+                        isOneToOne: false
+                        referencedRelation: "interview_templates"
+                        referencedColumns: ["id"]
+                    }
+                ]
             }
             interview_templates: {
                 Row: {
                     id: string
                     company_id: string | null
+                    created_by_recruiter_id: string | null
                     name: string
                     interview_length_minutes: number
                     location_type: 'online' | 'in_person'
                     online_link: string | null
                     in_person_location: string | null
                     candidate_briefing_text: string | null
-                    active: boolean | null
+                    active: boolean
+                    required_interviewers_count: number
                     created_at: string
                     updated_at: string | null
                 }
                 Insert: {
                     id?: string
                     company_id?: string | null
+                    created_by_recruiter_id?: string | null
                     name: string
                     interview_length_minutes: number
                     location_type: 'online' | 'in_person'
                     online_link?: string | null
                     in_person_location?: string | null
                     candidate_briefing_text?: string | null
-                    active?: boolean | null
+                    active?: boolean
                     created_at?: string
                     updated_at?: string | null
                 }
                 Update: {
                     id?: string
                     company_id?: string | null
+                    created_by_recruiter_id?: string | null
                     name?: string
                     interview_length_minutes?: number
                     location_type?: 'online' | 'in_person'
                     online_link?: string | null
                     in_person_location?: string | null
                     candidate_briefing_text?: string | null
-                    active?: boolean | null
+                    active?: boolean
                     created_at?: string
                     updated_at?: string | null
                 }
-            }
-            bookings: {
-                Row: {
-                    id: string
-                    template_id: string | null
-                    candidate_name: string
-                    candidate_email: string
-                    status: 'pending' | 'confirmed' | 'cancelled' | 'withdrawn' | 'completed'
-                    token: string
-                    created_at: string
-                    slot_id: string | null
-                    meeting_link: string | null
-                    meeting_platform: string | null
-                }
-                Insert: {
-                    id?: string
-                    template_id?: string | null
-                    candidate_name: string
-                    candidate_email: string
-                    status?: 'pending' | 'confirmed' | 'cancelled' | 'withdrawn' | 'completed'
-                    token: string
-                    created_at?: string
-                    slot_id?: string | null
-                    meeting_link?: string | null
-                    meeting_platform?: string | null
-                }
-                Update: {
-                    id?: string
-                    template_id?: string | null
-                    candidate_name?: string
-                    candidate_email?: string
-                    status?: 'pending' | 'confirmed' | 'cancelled' | 'withdrawn' | 'completed'
-                    token?: string
-                    created_at?: string
-                    slot_id?: string | null
-                    meeting_link?: string | null
-                    meeting_platform?: string | null
-                }
+                Relationships: [
+                    {
+                        foreignKeyName: "interview_templates_created_by_recruiter_id_fkey"
+                        columns: ["created_by_recruiter_id"]
+                        isOneToOne: false
+                        referencedRelation: "recruiters"
+                        referencedColumns: ["id"]
+                    },
+                    {
+                        foreignKeyName: "interview_templates_company_id_fkey"
+                        columns: ["company_id"]
+                        isOneToOne: false
+                        referencedRelation: "companies"
+                        referencedColumns: ["id"]
+                    }
+                ]
             }
             slots: {
                 Row: {
@@ -318,7 +356,82 @@ export interface Database {
                     source?: 'calendar' | 'override'
                     created_at?: string
                 }
+                Relationships: []
+            }
+            bookings: {
+                Row: {
+                    id: string
+                    template_id: string | null
+                    candidate_name: string
+                    candidate_email: string
+                    candidate_phone: string | null
+                    status: 'pending' | 'confirmed' | 'cancelled' | 'withdrawn' | 'completed'
+                    token: string
+                    slot_id: string | null
+                    meeting_link: string | null
+                    meeting_platform: string | null
+                    created_at: string
+                }
+                Insert: {
+                    id?: string
+                    template_id?: string | null
+                    candidate_name: string
+                    candidate_email: string
+                    candidate_phone?: string | null
+                    status?: 'pending' | 'confirmed' | 'cancelled' | 'withdrawn' | 'completed'
+                    token: string
+                    slot_id?: string | null
+                    meeting_link?: string | null
+                    meeting_platform?: string | null
+                    created_at?: string
+                }
+                Update: {
+                    id?: string
+                    template_id?: string | null
+                    candidate_name?: string
+                    candidate_email?: string
+                    candidate_phone?: string | null
+                    status?: 'pending' | 'confirmed' | 'cancelled' | 'withdrawn' | 'completed'
+                    token?: string
+                    slot_id?: string | null
+                    meeting_link?: string | null
+                    meeting_platform?: string | null
+                    created_at?: string
+                }
+                Relationships: []
+            }
+            template_files: {
+                Row: {
+                    id: string
+                    template_id: string | null
+                    file_url: string
+                    file_name: string | null
+                    created_at: string
+                }
+                Insert: {
+                    id?: string
+                    template_id?: string | null
+                    file_url: string
+                    file_name?: string | null
+                    created_at?: string
+                }
+                Update: {
+                    id?: string
+                    template_id?: string | null
+                    file_url?: string
+                    file_name?: string | null
+                    created_at?: string
+                }
+                Relationships: []
             }
         }
+        // eslint-disable-next-line @typescript-eslint/no-empty-object-type
+        Views: {}
+        // eslint-disable-next-line @typescript-eslint/no-empty-object-type
+        Functions: {}
+        // eslint-disable-next-line @typescript-eslint/no-empty-object-type
+        Enums: {}
+        // eslint-disable-next-line @typescript-eslint/no-empty-object-type
+        CompositeTypes: {}
     }
 }

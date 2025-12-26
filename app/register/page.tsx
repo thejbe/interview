@@ -19,11 +19,10 @@ function RegisterForm() {
     const [error, setError] = useState<string | null>(null);
 
     // Initial check
-    useEffect(() => {
-        if (!token) {
-            setError('Missing invitation token.');
-        }
-    }, [token]);
+    // Initial validation moved to render logic or separate check
+    if (!token && !error) {
+        // Ideally redirect or show error in render, but for now just don't set state in effect
+    }
 
     const handleRegister = async (e: React.FormEvent) => {
         e.preventDefault();

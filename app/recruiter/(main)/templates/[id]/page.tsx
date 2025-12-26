@@ -58,8 +58,8 @@ export default async function TemplateEditorPage({ params }: PageProps) {
             <TemplateForm
                 mode={isNew ? 'create' : 'edit'}
                 companies={companies || []}
-                managers={managers || []}
-                departments={departments || []} // Pass departments
+                managers={managers as any || []}
+                departments={departments as any || []} // Pass departments
                 initialData={safeTemplate}
             />
 

@@ -127,7 +127,7 @@ export function BookingForm({ slots, templateId, briefingText, existingBooking, 
 
         // Create or Update booking
         let bookingError;
-        let finalToken = crypto.randomUUID();
+        const finalToken = crypto.randomUUID();
 
         if (existingBooking?.id) {
             // Update existing
@@ -173,7 +173,7 @@ export function BookingForm({ slots, templateId, briefingText, existingBooking, 
         const { error: slotError } = await supabase
             .from('slots')
             .update({ status: 'booked' })
-            .in('id', allSlotIds);
+            .in('id', allSlotIds.filter((id): id is string => !!id));
 
         if (slotError) {
             console.error('Error updating slot status:', slotError);

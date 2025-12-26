@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
+import { notFound } from 'next/navigation';
 import { BookingForm } from '@/app/components/booking/BookingForm';
 
 interface PageProps {
@@ -21,6 +22,7 @@ export default async function BookingPage({ params }: PageProps) {
 
     if (bookingData) {
         booking = bookingData;
+        if (!bookingData.template_id) return notFound();
         templateId = bookingData.template_id;
 
         // If already confirmed, simple view (Phase 2 scope: just show message or let them re-view?)
@@ -45,8 +47,8 @@ export default async function BookingPage({ params }: PageProps) {
         .select('hiring_manager_id, role_type, hiring_managers(*)')
         .eq('template_id', templateId);
 
-    const mandatoryManagers = templateManagers?.filter(m => m.role_type === 'mandatory').map(m => m.hiring_manager_id) || [];
-    const atLeastOneManagers = templateManagers?.filter(m => m.role_type === 'at_least_one').map(m => m.hiring_manager_id) || [];
+    const mandatoryManagers = templateManagers?.filter(m => m.role_type === 'mandatory' && m.hiring_manager_id).map(m => m.hiring_manager_id as string) || [];
+    const atLeastOneManagers = templateManagers?.filter(m => m.role_type === 'at_least_one' && m.hiring_manager_id).map(m => m.hiring_manager_id as string) || [];
     const requiredCount = template.required_interviewers_count || 1;
 
     // Fetch open slots for the relevant managers
@@ -55,7 +57,7 @@ export default async function BookingPage({ params }: PageProps) {
     // AND status = 'open'
     // AND start_time > now
 
-    const allManagerIds = templateManagers?.map(m => m.hiring_manager_id) || [];
+    const allManagerIds = templateManagers?.filter(m => m.hiring_manager_id).map(m => m.hiring_manager_id as string) || [];
 
 
     if (allManagerIds.length === 0) {
@@ -117,7 +119,7 @@ export default async function BookingPage({ params }: PageProps) {
                 if (atLeastOneManagers.includes(id)) return 1;
                 return 2;
             };
-            return getPriority(a.hiring_manager_id) - getPriority(b.hiring_manager_id);
+            return getPriority(a.hiring_manager_id || '') - getPriority(b.hiring_manager_id || '');
         });
 
         const selectedSlots = slots.slice(0, requiredCount);
@@ -131,7 +133,7 @@ export default async function BookingPage({ params }: PageProps) {
             start_time: time,
             end_time: selectedSlots[0].end_time,
             status: 'open',
-            hiring_manager_id: selectedSlots[0].hiring_manager_id
+            hiring_manager_id: selectedSlots[0].hiring_manager_id || ''
         });
     });
 
@@ -146,15 +148,15 @@ export default async function BookingPage({ params }: PageProps) {
                         <span className="material-symbols-outlined text-primary text-3xl">videocam</span>
                     </div>
                     <h1 className="text-3xl font-bold text-black dark:text-white mb-2">Interview for {template.name}</h1>
-                    <p className="text-[#9fc992] text-lg">{template.interview_length_minutes} minute {template.location_type} interview with {template.companies?.name}</p>
+                    <p className="text-[#9fc992] text-lg">{template.interview_length_minutes} minute {template.location_type} interview with {template.companies?.name || 'Unknown Company'}</p>
                 </div>
 
                 <BookingForm
                     slots={validPanelSlots || []}
                     templateId={template.id}
-                    briefingText={template.candidate_briefing_text}
-                    existingBooking={booking}
-                    onlineLink={template.online_link}
+                    briefingText={template.candidate_briefing_text || undefined}
+                    existingBooking={booking ? { ...booking, id: booking.id, candidate_phone: booking.candidate_phone || '' } : undefined}
+                    onlineLink={template.online_link || undefined}
                     managers={(templateManagers as unknown as { hiring_manager_id: string; hiring_managers: { name: string; role?: string } }[])?.reduce((acc, curr) => {
                         acc[curr.hiring_manager_id] = curr.hiring_managers;
                         return acc;

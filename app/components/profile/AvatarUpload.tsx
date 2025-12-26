@@ -58,6 +58,8 @@ export default function AvatarUpload({ uid, url, size = 150, onUploadComplete }:
             setAvatarUrl(publicUrl);
             router.refresh(); // Refresh page to update other components if needed
             if (onUploadComplete) onUploadComplete();
+        } catch (error: any) {
+            console.error('Error uploading avatar:', error);
             toast.error('Error uploading avatar: ' + error.message);
         } finally {
             setUploading(false);

@@ -26,7 +26,7 @@ export function InviteMemberButton() {
         }
 
         let sentCount = 0;
-        let errors: string[] = [];
+        const errors: string[] = [];
 
         for (const singleEmail of emails) {
             const result = await inviteUser(singleEmail, role);

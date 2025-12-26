@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "test": "vitest run",
+    "verify": "./scripts/verify.sh",
     "e2e": "playwright test"
   },
   "dependencies": {

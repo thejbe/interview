@@ -72,14 +72,12 @@ export default async function TemplatesPage() {
                                             <tr key={template.id} className="border-b border-[#2c4823] hover:bg-[#2c4823]/10">
                                                 <td className="px-6 py-4 font-medium text-white">{template.name}</td>
                                                 <td className="px-6 py-4">
-                                                    {/* @ts-ignore */}
                                                     {template.companies?.name || 'Unknown'}
                                                 </td>
                                                 <td className="px-6 py-4">{template.interview_length_minutes} min</td>
                                                 <td className="px-6 py-4 capitalize">{template.location_type?.replace('_', ' ')}</td>
                                                 <td className="px-6 py-4">
                                                     <div className="flex -space-x-2">
-                                                        {/* @ts-ignore */}
                                                         {template.template_hiring_managers?.slice(0, 3).map((thm: any, idx: number) => {
                                                             const isProvided = availableManagerIds.has(thm.hiring_manager_id);
                                                             let colorClass = 'bg-gray-500';
@@ -95,7 +93,6 @@ export default async function TemplatesPage() {
                                                             );
                                                         })}
 
-                                                        {/* @ts-ignore */}
                                                         {(template.template_hiring_managers?.length || 0) > 3 && (
                                                             <div className="w-6 h-6 rounded-full bg-gray-700 border border-[#152211] flex items-center justify-center text-[10px] text-white">
                                                                 +{(template.template_hiring_managers?.length || 0) - 3}
@@ -142,7 +139,7 @@ export default async function TemplatesPage() {
                         </table>
                     </div>
                 </div>
-            </main>
-        </div>
+            </main >
+        </div >
     );
 }

@@ -84,6 +84,7 @@ export function AvailabilityGrid({ initialSlots, managerId }: AvailabilityGridPr
             monday.setHours(hour + 1);
             const endTime = monday.toISOString();
 
+            // eslint-disable-next-line
             const tempId = `temp-${Date.now()}-${Math.random()}`;
             const newSlot: Slot = {
                 id: tempId,

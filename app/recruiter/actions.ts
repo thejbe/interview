@@ -3,9 +3,11 @@
 import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
+import { Database } from '@/types/supabase';
+import { SupabaseClient } from '@supabase/supabase-js';
 
 export async function getEmailTemplate(key: string) {
-    const supabase = await createClient();
+    const supabase: SupabaseClient<Database> = await createClient();
     const { data } = await supabase.from('email_templates').select('*').eq('key', key).single();
     return data;
 }
@@ -21,7 +23,7 @@ export async function sendAvailabilityRequest(
         // 1. Fetch Template & Managers
         const { data: template } = await supabase
             .from('interview_templates')
-            .select('*, recruiters(first_name, last_name, email)')
+            .select('*, recruiters(name, email)')
             .eq('id', templateId)
             .single();
 
@@ -61,8 +63,8 @@ export async function sendAvailabilityRequest(
 
             // Replace variables
             const body = bodyTemplate!
-                .replace('{{manager_name}}', manager.name)
-                .replace('{{recruiter_name}}', `${template.recruiters?.first_name} ${template.recruiters?.last_name}`)
+                .replace('{{manager_name}}', manager.name || 'Manager')
+                .replace('{{recruiter_name}}', template.recruiters?.name || 'Recruiter')
                 .replace('{{template_name}}', template.name)
                 .replace('{{link}}', link);
 
@@ -97,9 +99,11 @@ export async function sendAvailabilityRequest(
 export async function createCandidateInvite(
     templateId: string,
     name: string,
-    email: string
+    email: string,
+    meetingLink?: string,
+    meetingPlatform?: string
 ) {
-    const supabase = await createClient();
+    const supabase: SupabaseClient<Database> = await createClient();
 
     try {
         // Generate a random token
@@ -114,6 +118,8 @@ export async function createCandidateInvite(
                 token: token,
                 status: 'pending',
                 slot_id: null, // Explicitly null for invite
+                meeting_link: meetingLink,
+                meeting_platform: meetingPlatform
             })
             .select()
             .single();
@@ -134,9 +140,11 @@ export async function createManualBooking(
     date: string,
     startTime: string, // "HH:MM"
     durationMinutes: number,
-    managerIds: string[]
+    managerIds: string[],
+    meetingLink?: string,
+    meetingPlatform?: string
 ) {
-    const supabase = await createClient();
+    const supabase: SupabaseClient<Database> = await createClient();
 
     try {
         // 1. Calculate Start/End ISO strings
@@ -144,7 +152,7 @@ export async function createManualBooking(
         const endDateTime = new Date(startDateTime.getTime() + durationMinutes * 60000);
 
         // 2. Create Slots for each manager (Override)
-        const newSlots = [];
+        const newSlots: { id: string }[] = [];
         for (const managerId of managerIds) {
             const { data: slot, error } = await supabase
                 .from('slots')
@@ -174,6 +182,8 @@ export async function createManualBooking(
             .update({
                 slot_id: primarySlot.id,
                 status: 'confirmed',
+                meeting_link: meetingLink,
+                meeting_platform: meetingPlatform
             })
             .eq('id', bookingId);
 
@@ -242,7 +252,7 @@ export async function inviteUser(email: string, role: 'admin' | 'member' = 'memb
 }
 
 export async function registerUser(token: string, name: string, password: string) {
-    const supabase = await createClient();
+    const supabase: SupabaseClient<Database> = await createClient();
 
     try {
         // 1. Validate Token

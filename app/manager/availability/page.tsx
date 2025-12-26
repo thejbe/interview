@@ -51,7 +51,7 @@ export default async function ManagerAvailabilityPage({ searchParams }: PageProp
             <div className="p-8 text-center">
                 <h1 className="text-2xl font-bold text-red-500 mb-4">Manager Profile Not Found</h1>
                 <p className="text-white mb-4">
-                    We couldn't find a hiring manager profile linked to your account.
+                    We couldn&apos;t find a hiring manager profile linked to your account.
                 </p>
                 <div className="text-sm text-gray-400">
                     User Email: {user.email}<br />
@@ -99,7 +99,7 @@ export default async function ManagerAvailabilityPage({ searchParams }: PageProp
                     <form action={handleDone}>
                         <Button type="submit">
                             <span className="material-symbols-outlined mr-2">check_circle</span>
-                            I'm Done
+                            I&apos;m Done
                         </Button>
                     </form>
                 </div>

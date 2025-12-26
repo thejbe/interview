@@ -48,11 +48,10 @@ export default async function ClientsPage() {
                                         <tr key={company.id} className="border-b border-[#2c4823] hover:bg-[#2c4823]/10">
                                             <td className="px-6 py-4 font-medium text-white">{company.name}</td>
                                             <td className="px-6 py-4">
-                                                {/* @ts-ignore */}
                                                 {company.departments?.map((d: any) => d.name).join(', ') || '-'}
                                             </td>
                                             <td className="px-6 py-4">
-                                                {/* @ts-ignore */}
+                                                {/* @ts-expect-error - Supabase join logic */}
                                                 {company.hiring_managers?.map((hm: any) => hm.name + (hm.role ? ` (${hm.role})` : '')).join(', ') || '-'}
                                             </td>
                                             <td className="px-6 py-4">
